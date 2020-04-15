@@ -20,4 +20,4 @@ To get started,
 
 5) Open CMD, run flask server by typing
 
-    flask run
+    python app.py
