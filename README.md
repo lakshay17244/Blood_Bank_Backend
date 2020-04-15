@@ -13,7 +13,7 @@ To get started,
 4) Open app.py and replace the following with your own Workbench Credentials
 
     app.config['MYSQL_USER'] = 'root'
-    app.config['MYSQL_PASSWORD'] = 'lakshay'
+    app.config['MYSQL_PASSWORD'] = 'dbms_123'
     app.config['MYSQL_HOST'] = '127.0.0.1'
     app.config['MYSQL_DB'] = 'ConnectGroup'
     app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
