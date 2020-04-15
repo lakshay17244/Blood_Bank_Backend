@@ -24,21 +24,6 @@ def home():
 	return "<h1>Hello World</h1>"
 
 
-@app.route('/user/<username>')
-def getUserDetailFromName(username):
-	cur = mysql.connection.cursor()
-	print_it(username)
-	query = " SELECT * FROM user where Username='"+username+"'"
-	# print_it(query)
-	try: 
-		cur.execute(query)
-		results = cur.fetchall()[0]
-		print_it(type(results))
-		return results
-	except:
-		return jsonify("{Error: 'True'}")
-
-
 @app.route('/table/<table>')
 def getTableDetails(table):
 	cur = mysql.connection.cursor()
@@ -56,6 +41,20 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
+
+@app.route('/showprofile/<userId>')
+def showProfile(userId):
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM user where UserID=%s"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()[0]
+		print_it(type(results))
+		return results
+	except:
+		return jsonify("{Error: 'True'}")
+
 
 @app.route('/login', methods=['POST'])
 def loginFunction():
