@@ -57,6 +57,25 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
+@app.route('/login', methods=['POST'])
+def loginFunction():
+	userId = request.json["UserID"]
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM passwords where UserID=%d"%(userId)
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()[0]
+		if(results['Password']==request.json["Password"]):
+			reponse = "{'status':200,'message':'Success'}"
+		else:
+			reponse = "{'status':401,'message':'Fail'}"
+		
+		return jsonify(reponse)
+	except:
+		return jsonify("{Error: 'True'}")
+
+
+
 @app.route('/createuser', methods=['POST'])
 def createUser():
 
