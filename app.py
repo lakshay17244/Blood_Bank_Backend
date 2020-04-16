@@ -31,6 +31,7 @@ def home():
 
 @app.route('/table/<table>')
 def getTableDetails(table):
+	#To see updated tables, just for development purpose
 	cur = mysql.connection.cursor()
 	print_it(table)
 	query = " SELECT * FROM "+ table
