@@ -73,7 +73,7 @@ def updateUser():
 			return jsonify(response)
 
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
 
 @app.route('/addemployee',methods = ['POST'])
@@ -116,7 +116,7 @@ def addEmp():
 			return jsonify(response)
 	
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
 
 @app.route('/donateblood',methods = ['POST'])
@@ -143,9 +143,9 @@ def donateBlood():
 		return jsonify(response)
 
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/showprofile/<userId>')
 def showProfile(userId):
 	cur = mysql.connection.cursor()
@@ -157,9 +157,9 @@ def showProfile(userId):
 		print_it(type(results))
 		return jsonify(results)
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/login', methods=['POST'])
 def loginFunction():
 
@@ -170,13 +170,13 @@ def loginFunction():
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Password']==request.json["Password"]):
-			response = "{'status':200,'message':'Success'}"
+			response = {'status':200,'message':'Logged in successfully'}
 		else:
-			response = "{'status':401,'message':'Fail'}"
+			response = {'status':401,'message':'Wrong Password'}
 		
 		return jsonify(response)
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
 
 @app.route('/createuser', methods=['POST'])
@@ -230,7 +230,7 @@ def createUser():
 		response = "{'userid':%d, 'status': %d, 'message':'Success'"%(id_,200)
 	
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
 	#Send back the response
 	return jsonify(response)
