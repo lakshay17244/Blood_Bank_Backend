@@ -35,6 +35,7 @@ def home():
 
 @app.route('/table/<table>')
 def getTableDetails(table):
+	#To see updated tables, just for development purpose
 	cur = mysql.connection.cursor()
 	print_it(table)
 	query = " SELECT * FROM "+ table
@@ -51,6 +52,100 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
+
+@app.route('/updateuser',methods = ['POST'])
+def updateUser():
+	userId = request.json['UserID']
+
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM user where UserID=%s"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		if(len(results)==0):
+			return jsonify("{'Error': 'True','message':'No such user'}")
+		else:
+			
+			#=================Code Here=================
+			
+			response = "{'status':200,'message':'Success'}"
+			return jsonify(response)
+
+	except Exception as e:
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+
+
+@app.route('/addemployee',methods = ['POST'])
+def addEmp():
+	userId = request.json['UserID']
+	place = request.json['place']
+
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM user where UserID=%s"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		if(len(results)==0):
+			return jsonify("{'Error': 'True','message':'No such user'}")
+		else:
+			
+			if(place == 'hospital'):
+				hid = request.json['HID']
+				sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
+				toPut = (userId,hid)
+			
+			elif(place == 'blood_bank'):
+				bbid = request.json['BBID']
+				sqlFormula = "INSERT INTO Blood_Bank_Employee VALUES(%s,%s)"
+				toPut = (userId,bbid)
+
+			elif(place == 'donation_centers'):
+				dcid = request.json['DCID']
+				sqlFormula = "INSERT INTO Donation_Centers_Employee VALUES(%s,%s)"
+				toPut = (userId,dcid)
+
+			else:
+				return  jsonify("{'Error': 'True','message':'Not a valid place'}")
+			
+			cur.execute(sqlFormula,toPut)
+			mysql.connection.commit()
+
+			response = "{'status':200,'message':'Success'}"
+			return jsonify(response)
+	
+	except Exception as e:
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+
+
+@app.route('/donateblood',methods = ['POST'])
+def donateBlood():
+	userId = request.json['UserID']
+	dateRec = request.json['DateRecieved']
+	bloodGrp = request.json['BloodGroup']
+	amt = request.json['Amount']
+	dcid = request.json['DCID']
+	avb = request.json['Available']
+
+	try:
+		mycursor = mysql.connection.cursor()
+		
+		sqlFormula = "INSERT INTO Donated_Blood VALUES(%s,%s,%s,%s,%s,%s)"
+		toPut = (userId,dateRec,bloodGrp,amt,dcid,avb)
+
+		print(sqlFormula,toPut)
+		mycursor.execute(sqlFormula,toPut)
+		mysql.connection.commit()
+
+		response = "{'status':200,'message':'Success'}"
+
+		return jsonify(response)
+
+	except Exception as e:
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+
+
 @app.route('/showprofile/<userId>')
 def showProfile(userId):
 	cur = mysql.connection.cursor()
@@ -60,10 +155,9 @@ def showProfile(userId):
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		print_it(type(results))
-		results = jsonify(results)
-		return (results)
-	except:
-		return jsonify("{Error: 'True'}")
+		return jsonify(results)
+	except Exception as e:
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
 
 
 @app.route('/login', methods=['POST'])
@@ -76,17 +170,13 @@ def loginFunction():
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Password']==request.json["Password"]):
-			response = "{'status':200,'message':'Logged In Successfuly'}"
+			response = "{'status':200,'message':'Success'}"
 		else:
-			response = "{'status':401,'message':'Wrong Password'}"
-		response = jsonify(response)
-
-		return response
+			response = "{'status':401,'message':'Fail'}"
+		
+		return jsonify(response)
 	except Exception as e:
-		print_it(e)
-		ress = jsonify("{Error: 'True'}")
-		return ress
-
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
 
 
 @app.route('/createuser', methods=['POST'])
@@ -111,7 +201,7 @@ def createUser():
 	user['Age'] = calculateAge(date(dob[0],dob[1],dob[2]))
 	print_it(user['Age'])
 
-	reponse = ""
+	response = ""
 	
 	try:
 		#Insert values in user table
@@ -136,16 +226,14 @@ def createUser():
 			mycursor.execute(query,toPut)
 			mysql.connection.commit()
 
-		#Make succesfull reponse
-		reponse = "{'userid':%d, 'status': %d, 'message':'Success'"%(id_,200)
+		#Make succesfull response
+		response = "{'userid':%d, 'status': %d, 'message':'Success'"%(id_,200)
 	
 	except Exception as e:
-		#Make response and print error
-		print(e)
-		reponse = "{'status': 401 ,'message': 'Error'}"
+		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
 
 	#Send back the response
-	return jsonify(reponse)
+	return jsonify(response)
 
 
 #=============================================================================================#
