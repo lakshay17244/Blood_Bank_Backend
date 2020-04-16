@@ -3,28 +3,32 @@
 from flask import Flask,jsonify,request
 from flask_mysqldb import MySQL 
 from datetime import date
-
+from flask_cors import CORS
 
 #=============================================================================================#
 
 app = Flask(__name__)
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
-app.config['MYSQL_HOST'] = '127.0.0.1'
-app.config['MYSQL_DB'] = 'ConnectGroup'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config["DEBUG"] = True
-mysql = MySQL(app)
+CORS(app)
 
 # app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 # app.config['MYSQL_DB'] = 'ConnectGroup'
 # app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config["DEBUG"] = True
+mysql = MySQL(app)
+
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
+app.config['MYSQL_HOST'] = '127.0.0.1'
+app.config['MYSQL_DB'] = 'ConnectGroup'
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #=============================================================================================#
 
-@app.route('/', methods=['GET'])
+
+
+@app.route('/')
 def home():
 	return "<h1>Hello World</h1>"
 
@@ -56,13 +60,15 @@ def showProfile(userId):
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		print_it(type(results))
-		return results
+		results = jsonify(results)
+		return (results)
 	except:
 		return jsonify("{Error: 'True'}")
 
 
 @app.route('/login', methods=['POST'])
 def loginFunction():
+
 	userId = request.json["UserID"]
 	cur = mysql.connection.cursor()
 	query = " SELECT * FROM passwords where UserID=%d"%(userId)
@@ -70,13 +76,16 @@ def loginFunction():
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Password']==request.json["Password"]):
-			reponse = "{'status':200,'message':'Success'}"
+			response = "{'status':200,'message':'Logged In Successfuly'}"
 		else:
-			reponse = "{'status':401,'message':'Fail'}"
-		
-		return jsonify(reponse)
-	except:
-		return jsonify("{Error: 'True'}")
+			response = "{'status':401,'message':'Wrong Password'}"
+		response = jsonify(response)
+
+		return response
+	except Exception as e:
+		print_it(e)
+		ress = jsonify("{Error: 'True'}")
+		return ress
 
 
 
