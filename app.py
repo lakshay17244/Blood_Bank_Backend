@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
 app.config['MYSQL_HOST'] = '127.0.0.1'
@@ -20,7 +20,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 mysql = MySQL(app)
 
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
 
 #=============================================================================================#
 
@@ -49,29 +49,6 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
-
-@app.route('/getpastdonations/<userId>')
-def getpastdonations(userId):
-	cur = mysql.connection.cursor()
-	query = " SELECT * FROM donated_blood where UserID=%s"%(userId)
-	try: 
-		cur.execute(query)
-		results = cur.fetchall()
-
-		for i in range(len(results)):
-			donationDate = results[i]['DateRecieved']
-			formattedDate = donationDate.strftime("%Y")+'-'+donationDate.strftime("%m")+'-'+donationDate.strftime("%d")
-			results[i]['DateRecieved'] = formattedDate
-			DCID = results[i]['DCID']
-			subquery = "SELECT Name FROM donation_centers where DCID=%s"%(DCID)  # SUBQUERY to get Donation Center Name
-			cur.execute(subquery)
-			Name = cur.fetchall()[0]
-			print(Name)
-			results[i].update(Name)
-		print_it(type(results))
-		return jsonify(results)
-	except Exception as e:
-		return jsonify({'Error': 'True','message': str(e)})
 
 
 @app.route('/updateuser',methods = ['POST'])
@@ -174,6 +151,11 @@ def showProfile(userId):
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()[0]
+		if(results['Type']=='Donor'):
+			subquery = 'SELECT BloodGroup FROM available_donor where UserID=%s'%(userId)
+			cur.execute(subquery)
+			bloodGroup = cur.fetchall()[0]
+			results.update(bloodGroup)
 		print_it(type(results))
 		return jsonify(results)
 	except Exception as e:
@@ -255,6 +237,29 @@ def createUser():
 	#Send back the response
 	return jsonify(response)
 
+# Working
+@app.route('/getpastdonations/<userId>')
+def getpastdonations(userId):
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM donated_blood where UserID=%s"%(userId)
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+
+		for i in range(len(results)):
+			donationDate = results[i]['DateRecieved']
+			formattedDate = donationDate.strftime("%Y")+'-'+donationDate.strftime("%m")+'-'+donationDate.strftime("%d")
+			results[i]['DateRecieved'] = formattedDate
+			DCID = results[i]['DCID']
+			subquery = "SELECT Name FROM donation_centers where DCID=%s"%(DCID)  # SUBQUERY to get Donation Center Name
+			cur.execute(subquery)
+			Name = cur.fetchall()[0]
+			print(Name)
+			results[i].update(Name)
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
 
 #=============================================================================================#
 
