@@ -5,7 +5,8 @@ from random import randint
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
-	passwd="lakshay",
+	# passwd="lakshay",
+	passwd="dbms_123",
 	database="ConnectGroup"
 )
 
@@ -16,9 +17,7 @@ mycursor=mydb.cursor()
 sqlFormula = "INSERT INTO user VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
 i=1
 for user in Users:
-	
 	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],user["Pincode"],user["Age"])
-	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
