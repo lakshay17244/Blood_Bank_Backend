@@ -10,19 +10,19 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
-# app.config['MYSQL_HOST'] = '127.0.0.1'
-# app.config['MYSQL_DB'] = 'ConnectGroup'
-# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config["DEBUG"] = True
-mysql = MySQL(app)
-
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'lakshay'
+app.config['MYSQL_PASSWORD'] = 'dbms_123'
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config["DEBUG"] = True
+mysql = MySQL(app)
+
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_HOST'] = '127.0.0.1'
+# app.config['MYSQL_DB'] = 'ConnectGroup'
+# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 #=============================================================================================#
 
@@ -64,7 +64,7 @@ def updateUser():
 		cur.execute(query)
 		results = cur.fetchall()
 		if(len(results)==0):
-			return jsonify("{'Error': 'True','message':'No such user'}")
+			return jsonify({'Error': 'True','message':'No such user'})
 		else:
 			
 			#=================Code Here=================
@@ -74,7 +74,6 @@ def updateUser():
 
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
-
 
 @app.route('/addemployee',methods = ['POST'])
 def addEmp():
@@ -107,7 +106,7 @@ def addEmp():
 				toPut = (userId,dcid)
 
 			else:
-				return  jsonify("{'Error': 'True','message':'Not a valid place'}")
+				return  jsonify({'Error': 'True','message':'Not a valid place'})
 			
 			cur.execute(sqlFormula,toPut)
 			mysql.connection.commit()
@@ -117,7 +116,6 @@ def addEmp():
 	
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
-
 
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
@@ -162,7 +160,7 @@ def showProfile(userId):
 # Working
 @app.route('/login', methods=['POST'])
 def loginFunction():
-
+	# dcid/hid/bbid FETCH
 	userId = request.json["UserID"]
 	cur = mysql.connection.cursor()
 	query = " SELECT * FROM passwords where UserID=%d"%(userId)
@@ -178,7 +176,7 @@ def loginFunction():
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/createuser', methods=['POST'])
 def createUser():
 
@@ -227,7 +225,7 @@ def createUser():
 			mysql.connection.commit()
 
 		#Make succesfull response
-		response = "{'userid':%d, 'status': %d, 'message':'Success'"%(id_,200)
+		response = {'userid':id_, 'status': 200, 'message':'Success'}
 	
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
