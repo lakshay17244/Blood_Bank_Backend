@@ -21,6 +21,8 @@ CHECK (`Type` IN ('Donor' , 'Patient','Admin'))
 
 CREATE TABLE `Blood_Bank`
 (
+ `Name`          varchar(150) NOT NULL ,
+ `Pincode` 		varchar(50) NOT NULL ,
  `BBID`          int UNIQUE ,
  `CapacityLeft`  int NOT NULL ,
  `TotalCapacity` int ,
@@ -33,10 +35,12 @@ CHECK (`CapacityLeft` <= `TotalCapacity`)
 
 CREATE TABLE `Donation_Centers`
 (
+ `Name`         varchar(150) NOT NULL ,
  `DCID`    		int UNIQUE,
- `Pincode` 		varchar(10) NOT NULL ,
+ `Pincode` 		varchar(50) NOT NULL ,
  `Address` 		varchar(60) NOT NULL ,
  `BBID`  		int NOT NULL UNIQUE ,
+
 
 PRIMARY KEY (`DCID`) ,
 FOREIGN KEY (`BBID`) REFERENCES Blood_Bank(`BBID`)

@@ -5,7 +5,7 @@ from random import randint
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
-	passwd="dbms_123",
+	passwd="lakshay",
 	database="ConnectGroup"
 )
 
@@ -18,7 +18,7 @@ i=1
 for user in Users:
 	
 	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],user["Pincode"],user["Age"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -29,7 +29,7 @@ i=1
 for h in Hospitals:
 	# print(h)
 	toPut = (i,h["Name"]+" Hospital",h["Pincode"],h["Address"],h["AdmittedPatients"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -40,29 +40,29 @@ i=1
 for passwd in Passwords:
 	# print(passwd)
 	toPut = (i,passwd["Password"],Users[i-1]["Username"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
 
 ############ BLOOD BANK TABLE ############
-sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s)"
+sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in BloodBanks:
 	# print(h)
-	toPut = (i,randint(0,h["TotalCapacity"]),h["TotalCapacity"])
+	toPut = (h["Name"]+" Blood Bank",h["Pincode"],i,randint(0,h["TotalCapacity"]),h["TotalCapacity"])
 	print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
 
 ############ DONATION_CENTER TABLE ############
-sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s)"
+sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
 
 i=1
 for h in Donation_Centers:
 	# print(h)
-	toPut = (i,h["Pincode"],h["Address"],i)
+	toPut = (h["Name"]+" Donation Center",i,h["Pincode"],h["Address"],i)
 	print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
@@ -73,7 +73,7 @@ sqlFormula = "INSERT INTO Donated_Blood VALUES(%s,%s,%s,%s,%s,%s)"
 for i in range(30,60):
 	h=Available_Donors[i]
 	toPut = (i,h["RegisteredOn"],h["BloodGroup"],randint(1,3),randint(1,100),randint(0,1))
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -84,7 +84,7 @@ i=1
 for h in Available_Donors:
 	# print(h)
 	toPut = (i,h["RegisteredOn"],h["BloodGroup"],h["WillingToDonate"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -95,7 +95,7 @@ sqlFormula = "INSERT INTO Patients_List VALUES(%s,%s,%s,%s)"
 for h in Patients_List:
 	# print(h)
 	toPut = (h["UserID"],h["AdmissionDate"],h["BloodNeeded"],h["HID"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	mydb.commit()
 
@@ -105,7 +105,7 @@ i=1
 for h in ProfilePictures:
 	# print(h)
 	toPut = (i,h["URL"])
-	print(toPut)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -118,7 +118,7 @@ for i in range(1,100):
 	h=Users[i]
 	if(h["Type"]=="Admin"):
 		toPut = (i,randint(1,100))
-		print(toPut)
+		# print(toPut)
 		toss = randint(0,3)
 		if(toss==0):
 			sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
