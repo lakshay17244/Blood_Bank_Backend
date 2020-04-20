@@ -3,28 +3,30 @@
 from flask import Flask,jsonify,request
 from flask_mysqldb import MySQL 
 from datetime import date
-
+from flask_cors import CORS
 
 #=============================================================================================#
 
 app = Flask(__name__)
+CORS(app)
+
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
+
+
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 mysql = MySQL(app)
 
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
-# app.config['MYSQL_HOST'] = '127.0.0.1'
-# app.config['MYSQL_DB'] = 'ConnectGroup'
-# app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
 
 #=============================================================================================#
 
-@app.route('/', methods=['GET'])
+
+
+@app.route('/')
 def home():
 	return "<h1>Hello World</h1>"
 
@@ -60,7 +62,7 @@ def updateUser():
 		cur.execute(query)
 		results = cur.fetchall()
 		if(len(results)==0):
-			return jsonify("{'Error': 'True','message':'No such user'}")
+			return jsonify({'Error': 'True','message':'No such user'})
 		else:
 			
 			#=================Code Here=================
@@ -69,8 +71,7 @@ def updateUser():
 			return jsonify(response)
 
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
-
+		return jsonify({'Error': 'True','message': str(e)})
 
 @app.route('/addemployee',methods = ['POST'])
 def addEmp():
@@ -103,7 +104,7 @@ def addEmp():
 				toPut = (userId,dcid)
 
 			else:
-				return  jsonify("{'Error': 'True','message':'Not a valid place'}")
+				return  jsonify({'Error': 'True','message':'Not a valid place'})
 			
 			cur.execute(sqlFormula,toPut)
 			mysql.connection.commit()
@@ -112,9 +113,9 @@ def addEmp():
 			return jsonify(response)
 	
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
 	userId = request.json['UserID']
@@ -134,14 +135,14 @@ def donateBlood():
 		mycursor.execute(sqlFormula,toPut)
 		mysql.connection.commit()
 
-		response = "{'status':200,'message':'Success'}"
+		response = {'status':200,'message':'Successfully Updated Donation Record'}
 
 		return jsonify(response)
 
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/showprofile/<userId>')
 def showProfile(userId):
 	cur = mysql.connection.cursor()
@@ -150,14 +151,20 @@ def showProfile(userId):
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()[0]
+		if(results['Type']=='Donor'):
+			subquery = 'SELECT BloodGroup FROM available_donor where UserID=%s'%(userId)
+			cur.execute(subquery)
+			bloodGroup = cur.fetchall()[0]
+			results.update(bloodGroup)
 		print_it(type(results))
 		return jsonify(results)
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/login', methods=['POST'])
 def loginFunction():
+	# dcid/hid/bbid FETCH
 	userId = request.json["UserID"]
 	cur = mysql.connection.cursor()
 	query = " SELECT * FROM passwords where UserID=%d"%(userId)
@@ -165,15 +172,15 @@ def loginFunction():
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Password']==request.json["Password"]):
-			response = "{'status':200,'message':'Success'}"
+			response = {'status':200,'message':'Logged in successfully'}
 		else:
-			response = "{'status':401,'message':'Fail'}"
+			response = {'status':401,'message':'Wrong Password'}
 		
 		return jsonify(response)
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/createuser', methods=['POST'])
 def createUser():
 
@@ -222,14 +229,37 @@ def createUser():
 			mysql.connection.commit()
 
 		#Make succesfull response
-		response = "{'userid':%d, 'status': %d, 'message':'Success'"%(id_,200)
+		response = {'userid':id_, 'status': 200, 'message':'Success'}
 	
 	except Exception as e:
-		return jsonify("{'Error': 'True','message': %s}"%(str(e)))
+		return jsonify({'Error': 'True','message': str(e)})
 
 	#Send back the response
 	return jsonify(response)
 
+# Working
+@app.route('/getpastdonations/<userId>')
+def getpastdonations(userId):
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM donated_blood where UserID=%s"%(userId)
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+
+		for i in range(len(results)):
+			donationDate = results[i]['DateRecieved']
+			formattedDate = donationDate.strftime("%Y")+'-'+donationDate.strftime("%m")+'-'+donationDate.strftime("%d")
+			results[i]['DateRecieved'] = formattedDate
+			DCID = results[i]['DCID']
+			subquery = "SELECT Name FROM donation_centers where DCID=%s"%(DCID)  # SUBQUERY to get Donation Center Name
+			cur.execute(subquery)
+			Name = cur.fetchall()[0]
+			print(Name)
+			results[i].update(Name)
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
 
 #=============================================================================================#
 
