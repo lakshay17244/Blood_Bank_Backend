@@ -117,6 +117,7 @@ def addEmp():
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
+# Working
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
 	userId = request.json['UserID']
@@ -136,12 +137,12 @@ def donateBlood():
 		mycursor.execute(sqlFormula,toPut)
 		mysql.connection.commit()
 
-		response = "{'status':200,'message':'Success'}"
+		response = {'status':200,'message':'Successfully Updated Donation Record'}
 
 		return jsonify(response)
 
 	except Exception as e:
-		return jsonify({'Error': 'True','message': str(e)})
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
 # Working
 @app.route('/showprofile/<userId>')
