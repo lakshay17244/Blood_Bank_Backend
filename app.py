@@ -49,19 +49,13 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
-
+# Working
 @app.route('/updateuser',methods = ['POST'])
 def updateUser():
 
 	id_ = request.json['UserID']
 	user = request.json['user']
 	print_it(user)
-	
-	#Calculate age from given DOB
-	dob = list(map(int,user['Dob'].split('-')))
-	print_it(dob)
-	user['Age'] = calculateAge(date(dob[0],dob[1],dob[2]))
-	print_it(user['Age'])
 
 	response = ""
 	
@@ -90,7 +84,7 @@ def updateUser():
 			mycursor.execute(query,toPut)
 			mysql.connection.commit()
 
-		#Make succesfull response
+		#Make successful response
 		response = {'userid':id_, 'status': 200, 'message':'Success'}
 	
 	except Exception as e:
@@ -98,7 +92,6 @@ def updateUser():
 
 	#Send back the response
 	return jsonify(response)
-
 
 # Working
 @app.route('/getemergencyrequirements/<userId>')
@@ -388,6 +381,10 @@ def showProfile(userId):
 			cur.execute(subquery)
 			bloodGroup = cur.fetchall()[0]
 			results.update(bloodGroup)
+			subquery = 'SELECT WillingToDonate FROM available_donor where UserID=%s'%(userId)
+			cur.execute(subquery)
+			wtd = cur.fetchall()[0]
+			results.update(wtd)
 		print_it(type(results))
 		return jsonify(results)
 	except Exception as e:
