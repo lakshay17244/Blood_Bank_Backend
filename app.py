@@ -11,16 +11,16 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
-
-
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
+
+app.config['MYSQL_PASSWORD'] = 'dbms_123'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+
 mysql = MySQL(app)
 
-app.config['MYSQL_PASSWORD'] = 'lakshay'
 
 #=============================================================================================#
 
@@ -43,7 +43,7 @@ def getTableDetails(table):
 		cur.execute(query)
 		results = cur.fetchall()
 	except:
-		results = "{Error: 'True'}"
+		results = {Error: 'True'}
 
 	return jsonify(results)
 
@@ -56,7 +56,7 @@ def updateUser():
 	userId = request.json['UserID']
 
 	cur = mysql.connection.cursor()
-	query = " SELECT * FROM user where UserID=%s"%(userId)
+	query = "SELECT * FROM user where UserID=%s"%(userId)
 
 	try: 
 		cur.execute(query)
@@ -67,11 +67,139 @@ def updateUser():
 			
 			#=================Code Here=================
 			
-			response = "{'status':200,'message':'Success'}"
+			response = {'status':200,'message':'Success'}
 			return jsonify(response)
 
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
+@app.route('/addbloodbank',methods = ['POST'])
+def addBloodBank():
+	name = request.json['Name']
+	address = request.json['Address']
+	pincode = request.json['Pincode']
+	user_list = request.json['UserID']
+	totalCap = request.json['TotalCapacity']
+	capLeft = request.json['CapacityLeft']
+
+	try:
+		mycursor = mysql.connection.cursor()	
+		query = "SELECT count(*) FROM Blood_Bank"
+		mycursor.execute(query)
+		
+		#New id as total blood_banks + 1
+		id_ = mycursor.fetchall()[0]['count(*)'] + 1
+		print_it(id_)
+		
+		sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
+		toPut = (name,pincode,id_,address,capLeft,totalCap)
+
+		mycursor.execute(sqlFormula,toPut)
+		mysql.connection.commit()
+
+		for uid in user_list:
+			query = " SELECT * FROM user where UserID=%s"%(uid)
+			mycursor.execute(query)
+			results = mycursor.fetchall()
+			if(len(results)==0):
+				return jsonify({'Error': 'True','message':'No such user'+str(uid)})
+			else:
+				sqlFormula = "INSERT INTO Blood_Bank_Employee VALUES(%s,%s)"
+				toPut = (uid,id_)
+				mycursor.execute(sqlFormula,toPut)
+				mysql.connection.commit()
+
+		response = {'status':200,'message':'Success'}
+		return jsonify(response)
+
+	except Exception as e:
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
+
+
+@app.route('/adddonationcenter',methods = ['POST'])
+def addDonCen():
+	name = request.json['Name']
+	address = request.json['Address']
+	pincode = request.json['Pincode']
+	user_list = request.json['UserID']
+	bbid = request.json['BBID']
+
+	try:
+		mycursor = mysql.connection.cursor()	
+		query = "SELECT count(*) FROM Donation_Centers"
+		mycursor.execute(query)
+		
+		#New id as total Donation_Centers + 1
+		id_ = mycursor.fetchall()[0]['count(*)'] + 1
+		print_it(id_)
+		
+		sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
+		toPut = (name,id_,pincode,address,bbid)
+
+		mycursor.execute(sqlFormula,toPut)
+		mysql.connection.commit()
+
+		for uid in user_list:
+			query = " SELECT * FROM user where UserID=%s"%(uid)
+			mycursor.execute(query)
+			results = mycursor.fetchall()
+			if(len(results)==0):
+				return jsonify({'Error': 'True','message':'No such user'+str(uid)})
+			else:
+				sqlFormula = "INSERT INTO Donation_Centers_Employee VALUES(%s,%s)"
+				toPut = (uid,id_)
+				mycursor.execute(sqlFormula,toPut)
+				mysql.connection.commit()
+
+		response = {'status':200,'message':'Success'}
+		return jsonify(response)
+
+	except Exception as e:
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
+
+
+@app.route('/addhospital',methods = ['POST'])
+def addHospital():
+	name = request.json['Name']
+	address = request.json['Address']
+	pincode = request.json['Pincode']
+	user_list = request.json['UserID']
+	admPatient = request.json['AdmittedPatients']
+
+	try:
+		mycursor = mysql.connection.cursor()	
+		query = "SELECT count(*) FROM Hospital"
+		mycursor.execute(query)
+		
+		#New id as total Hospital + 1
+		id_ = mycursor.fetchall()[0]['count(*)'] + 1
+		print_it(id_)
+		
+		sqlFormula = "INSERT INTO hospital VALUES(%s,%s,%s,%s,%s)"
+		toPut = (id_,name,pincode,address,admPatient)
+
+		mycursor.execute(sqlFormula,toPut)
+		mysql.connection.commit()
+
+		for uid in user_list:
+			query = " SELECT * FROM user where UserID=%s"%(uid)
+			mycursor.execute(query)
+			results = mycursor.fetchall()
+			if(len(results)==0):
+				return jsonify({'Error': 'True','message':'No such user'+str(uid)})
+			else:
+				sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
+				toPut = (uid,id_)
+				mycursor.execute(sqlFormula,toPut)
+				mysql.connection.commit()
+
+		response = {'status':200,'message':'Success'}
+		return jsonify(response)
+
+	except Exception as e:
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
+
 
 @app.route('/addemployee',methods = ['POST'])
 def addEmp():
@@ -85,7 +213,7 @@ def addEmp():
 		cur.execute(query)
 		results = cur.fetchall()
 		if(len(results)==0):
-			return jsonify("{'Error': 'True','message':'No such user'}")
+			return jsonify({'Error': 'True','message':'No such user'})
 		else:
 			
 			if(place == 'hospital'):
@@ -109,7 +237,7 @@ def addEmp():
 			cur.execute(sqlFormula,toPut)
 			mysql.connection.commit()
 
-			response = "{'status':200,'message':'Success'}"
+			response = {'status':200,'message':'Success Add Emp'}
 			return jsonify(response)
 	
 	except Exception as e:
