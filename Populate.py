@@ -5,19 +5,23 @@ from random import randint
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
-	# passwd="lakshay",
-	passwd="dbms_123",
+	passwd="lakshay",
+	# passwd="dbms_123",
 	database="ConnectGroup"
 )
 
 mycursor=mydb.cursor()
 
+Pincodes = ["110010","110020","110030","110040","110050","110060","110070","110090","118900","100200"]
+
+def getPincode():
+	return Pincodes[randint(0,9)]
 
 ############ USER TABLE ############
 sqlFormula = "INSERT INTO user VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
 i=1
 for user in Users:
-	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],user["Pincode"],user["Age"])
+	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],getPincode(),user["Age"])
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -27,7 +31,7 @@ sqlFormula = "INSERT INTO hospital VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in Hospitals:
 	# print(h)
-	toPut = (i,h["Name"]+" Hospital",h["Pincode"],h["Address"],h["AdmittedPatients"])
+	toPut = (i,h["Name"]+" Hospital",getPincode(),h["Address"],h["AdmittedPatients"])
 	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
@@ -45,12 +49,12 @@ for passwd in Passwords:
 	mydb.commit()
 
 ############ BLOOD BANK TABLE ############
-sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s)"
+sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
 i=1
 for h in BloodBanks:
 	# print(h)
-	toPut = (h["Name"]+" Blood Bank",h["Pincode"],i,randint(0,h["TotalCapacity"]),h["TotalCapacity"])
-	print(toPut)
+	toPut = (h["Name"]+" Blood Bank",getPincode(),h["Address"],i,randint(0,h["TotalCapacity"]),h["TotalCapacity"])
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -61,8 +65,8 @@ sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in Donation_Centers:
 	# print(h)
-	toPut = (h["Name"]+" Donation Center",i,h["Pincode"],h["Address"],i)
-	print(toPut)
+	toPut = (h["Name"]+" Donation Center",i,getPincode(),h["Address"],i)
+	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()

@@ -118,25 +118,29 @@ def addEmp():
 # Working
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
-	userId = request.json['UserID']
+	userIdArray = request.json['UserID']
+	AdminID = request.json['AdminID']
 	dateRec = request.json['DateRecieved']
-	bloodGrp = request.json['BloodGroup']
 	amt = request.json['Amount']
-	dcid = request.json['DCID']
-	avb = request.json['Available']
-
 	try:
-		mycursor = mysql.connection.cursor()
-		
+		cur = mysql.connection.cursor()
 		sqlFormula = "INSERT INTO Donated_Blood VALUES(%s,%s,%s,%s,%s,%s)"
-		toPut = (userId,dateRec,bloodGrp,amt,dcid,avb)
-
-		print(sqlFormula,toPut)
-		mycursor.execute(sqlFormula,toPut)
-		mysql.connection.commit()
-
+		i=0	
+		queryGetDCID = "SELECT DCID FROM donation_centers_employee where UserID=%s"%(AdminID)
+		cur.execute(queryGetDCID)
+		DCID = cur.fetchall()[0]['DCID']
+		for user in userIdArray:
+			# Get Donor Blood Group
+			subquery = 'SELECT BloodGroup FROM available_donor where UserID=%s'%(user)
+			cur.execute(subquery)
+			bloodGroup = cur.fetchall()[0]['BloodGroup']
+			# Add Donation Record
+			toPut = (user,dateRec,bloodGroup,amt[i],DCID,1)
+			print(sqlFormula,toPut)
+			cur.execute(sqlFormula,toPut)
+			mysql.connection.commit()
+			i=i+1
 		response = {'status':200,'message':'Successfully Updated Donation Record'}
-
 		return jsonify(response)
 
 	except Exception as e:
