@@ -25,7 +25,6 @@ CREATE TABLE `Blood_Bank`
  `Pincode` 		varchar(50) NOT NULL ,
  `Address` 		varchar(60) NOT NULL ,
  `BBID`          int UNIQUE ,
- `Address`  varchar(60) NOT NULL ,
  `CapacityLeft`  int NOT NULL ,
  `TotalCapacity` int ,
 
