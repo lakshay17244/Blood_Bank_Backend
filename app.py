@@ -25,7 +25,6 @@ mysql = MySQL(app)
 #=============================================================================================#
 
 
-
 @app.route('/')
 def home():
 	return "<h1>Hello World</h1>"
@@ -53,25 +52,52 @@ def getTableDetails(table):
 
 @app.route('/updateuser',methods = ['POST'])
 def updateUser():
-	userId = request.json['UserID']
 
-	cur = mysql.connection.cursor()
-	query = "SELECT * FROM user where UserID=%s"%(userId)
+	id_ = request.json['UserID']
+	user = request.json['user']
+	print_it(user)
+	
+	#Calculate age from given DOB
+	dob = list(map(int,user['Dob'].split('-')))
+	print_it(dob)
+	user['Age'] = calculateAge(date(dob[0],dob[1],dob[2]))
+	print_it(user['Age'])
 
-	try: 
-		cur.execute(query)
-		results = cur.fetchall()
-		if(len(results)==0):
-			return jsonify({'Error': 'True','message':'No such user'})
-		else:
-			
-			#=================Code Here=================
-			
-			response = {'status':200,'message':'Success'}
-			return jsonify(response)
+	response = ""
+	
+	try:
+		mycursor = mysql.connection.cursor()	
 
+		#Update values in user table
+		sqlFormula = "UPDATE user SET Type=%s,Username=%s,Phone=%s,Email=%s,Address=%s,Pincode=%s,Age=%s WHERE UserID=%s"
+		toPut = (user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],user["Pincode"],user["Age"],id_)
+		print(sqlFormula,toPut)
+		mycursor.execute(sqlFormula,toPut)
+		mysql.connection.commit()
+
+
+		#Update values in password table
+		sqlPass = "UPDATE passwords SET Password=%s,Username=%s WHERE UserID=%s"
+		toPut = (user["Password"],user["Username"],id_)
+		mycursor.execute(sqlPass,toPut)
+		mysql.connection.commit()
+		
+
+		#Update values in Donor table
+		if(user['Type']=="Donor"):
+			query = "UPDATE available_donor SET BloodGroup=%s,WillingToDonate=%s WHERE UserID=%s"
+			toPut = (user["Bloodgroup"],user["WTD"],id_)
+			mycursor.execute(query,toPut)
+			mysql.connection.commit()
+
+		#Make succesfull response
+		response = {'userid':id_, 'status': 200, 'message':'Success'}
+	
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
 
 
 # Working
