@@ -16,8 +16,8 @@ app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
 
 mysql = MySQL(app)
 
@@ -74,6 +74,80 @@ def updateUser():
 		return jsonify({'Error': 'True','message': str(e)})
 
 
+# Working
+@app.route('/getemergencyrequirements/<userId>')
+def getemergencyrequirements(userId):
+	cur = mysql.connection.cursor()
+	
+	subquery = 'SELECT BloodGroup FROM available_donor where UserID=%s'%(userId)
+	
+	try: 
+		cur.execute(subquery)
+		bloodGroup = cur.fetchall()[0]['BloodGroup']
+		print(bloodGroup)
+		query = 'SELECT BloodNeeded, AdmissionDate,patients_list.HID,Name,Pincode,Address FROM patients_list, hospital where patients_list.HID = hospital.HID and patients_list.BloodNeeded="%s"'%(bloodGroup)
+		print(query)
+		cur.execute(query)
+		results = cur.fetchall()
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+# Working
+@app.route('/getallhospitals')
+def getallhospitals():
+	cur = mysql.connection.cursor()
+	query = "SELECT * FROM hospital"
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+# Working
+@app.route('/getnearbyhospitals/<userId>')
+def getnearbyhospitals(userId):
+	cur = mysql.connection.cursor()
+	query = "SELECT * FROM hospital where Pincode in (Select Pincode from user where UserID=%s)"%(userId)
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+# Working
+@app.route('/getalldc')
+def getalldc():
+	cur = mysql.connection.cursor()
+	query = "SELECT * FROM donation_centers"
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+# Working
+@app.route('/getnearbydc/<userId>')
+def getnearbydc(userId):
+	cur = mysql.connection.cursor()
+	query = "SELECT * FROM donation_centers where Pincode in (Select Pincode from user where UserID=%s)"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		print_it(type(results))
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+# Working
 @app.route('/addbloodbank',methods = ['POST'])
 def addBloodBank():
 	name = request.json['Name']
@@ -110,13 +184,13 @@ def addBloodBank():
 				mycursor.execute(sqlFormula,toPut)
 				mysql.connection.commit()
 
-		response = {'status':200,'message':'Success'}
+		response = {'status':200,'message':'Created a new blood bank, with ID='+str(id_),'BBID':id_}
 		return jsonify(response)
 
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/adddonationcenter',methods = ['POST'])
 def addDonCen():
 	name = request.json['Name']
@@ -152,13 +226,13 @@ def addDonCen():
 				mycursor.execute(sqlFormula,toPut)
 				mysql.connection.commit()
 
-		response = {'status':200,'message':'Success'}
+		response = {'status':200,'message':'Created a new donation center, with ID='+str(id_),'DCID':id_}
 		return jsonify(response)
 
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
-
+# Working
 @app.route('/addhospital',methods = ['POST'])
 def addHospital():
 	name = request.json['Name']
@@ -194,7 +268,7 @@ def addHospital():
 				mycursor.execute(sqlFormula,toPut)
 				mysql.connection.commit()
 
-		response = {'status':200,'message':'Success'}
+		response = {'status':200,'message':'Created a new hospital, with ID='+str(id_),'HID':id_}
 		return jsonify(response)
 
 	except Exception as e:
