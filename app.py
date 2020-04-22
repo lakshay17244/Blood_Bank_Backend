@@ -49,7 +49,7 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
-# Working
+# Working / Uses Transaction
 @app.route('/updateuser',methods = ['POST'])
 def updateUser():
 
@@ -61,20 +61,22 @@ def updateUser():
 	
 	try:
 		mycursor = mysql.connection.cursor()	
-
+		
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
 		#Update values in user table
 		sqlFormula = "UPDATE user SET Type=%s,Username=%s,Phone=%s,Email=%s,Address=%s,Pincode=%s,Age=%s WHERE UserID=%s"
 		toPut = (user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],user["Pincode"],user["Age"],id_)
 		print(sqlFormula,toPut)
 		mycursor.execute(sqlFormula,toPut)
-		mysql.connection.commit()
 
 
 		#Update values in password table
 		sqlPass = "UPDATE passwords SET Password=%s,Username=%s WHERE UserID=%s"
 		toPut = (user["Password"],user["Username"],id_)
+		print(sqlPass,toPut)
 		mycursor.execute(sqlPass,toPut)
-		mysql.connection.commit()
 		
 
 		#Update values in Donor table
@@ -82,12 +84,15 @@ def updateUser():
 			query = "UPDATE available_donor SET BloodGroup=%s,WillingToDonate=%s WHERE UserID=%s"
 			toPut = (user["Bloodgroup"],user["WTD"],id_)
 			mycursor.execute(query,toPut)
-			mysql.connection.commit()
 
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
 		#Make successful response
 		response = {'userid':id_, 'status': 200, 'message':'Success'}
 	
 	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
 		return jsonify({'Error': 'True','message': str(e)})
 
 	#Send back the response
@@ -166,7 +171,7 @@ def getnearbydc(userId):
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
-# Working
+# Working / Uses Transaction
 @app.route('/addbloodbank',methods = ['POST'])
 def addBloodBank():
 	name = request.json['Name']
@@ -178,6 +183,9 @@ def addBloodBank():
 
 	try:
 		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+
 		query = "SELECT count(*) FROM Blood_Bank"
 		mycursor.execute(query)
 		
@@ -189,7 +197,6 @@ def addBloodBank():
 		toPut = (name,pincode,id_,address,capLeft,totalCap)
 
 		mycursor.execute(sqlFormula,toPut)
-		mysql.connection.commit()
 
 		for uid in user_list:
 			query = " SELECT * FROM user where UserID=%s"%(uid)
@@ -201,12 +208,14 @@ def addBloodBank():
 				sqlFormula = "INSERT INTO Blood_Bank_Employee VALUES(%s,%s)"
 				toPut = (uid,id_)
 				mycursor.execute(sqlFormula,toPut)
-				mysql.connection.commit()
 
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
 		response = {'status':200,'message':'Created a new blood bank, with ID='+str(id_),'BBID':id_}
 		return jsonify(response)
-
 	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
 # Working
