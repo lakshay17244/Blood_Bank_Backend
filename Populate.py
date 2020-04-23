@@ -132,3 +132,9 @@ for i in range(1,100):
 		
 		mycursor.execute(sqlFormula,toPut)
 		mydb.commit()
+
+
+# Delete Donor Type Associated with BB
+# sqlFormula = "Delete FROM blood_bank_employee where UserID in (Select UserID from user where type="Donor");"
+# mycursor.execute(sqlFormula)
+# mydb.commit()

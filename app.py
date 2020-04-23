@@ -73,10 +73,11 @@ def updateUser():
 
 
 		#Update values in password table
-		sqlPass = "UPDATE passwords SET Password=%s,Username=%s WHERE UserID=%s"
-		toPut = (user["Password"],user["Username"],id_)
-		print(sqlPass,toPut)
-		mycursor.execute(sqlPass,toPut)
+		if (len(user["Password"]) > 0 ):
+			sqlPass = "UPDATE passwords SET Password=%s,Username=%s WHERE UserID=%s"
+			toPut = (user["Password"],user["Username"],id_)
+			print(sqlPass,toPut)
+			mycursor.execute(sqlPass,toPut)
 		
 
 		#Update values in Donor table
@@ -500,6 +501,8 @@ def getpastdonations(userId):
 		return jsonify({'Error': 'True','message': str(e)})
 
 #=============================================================================================#
+def getAssociatedOrganizations(userId):
+	
 
 # Helper function to calculate age from DOB 
 def calculateAge(birthDate): 
