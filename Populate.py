@@ -5,8 +5,8 @@ from random import randint
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
-	passwd="lakshay",
-	# passwd="dbms_123",
+	# passwd="lakshay",
+	passwd="dbms_123",
 	database="ConnectGroup"
 )
 
@@ -93,12 +93,13 @@ for h in Available_Donors:
 	mydb.commit()
 
 ########### Patients List TABLE ############
-sqlFormula = "INSERT INTO Patients_List VALUES(%s,%s,%s,%s)"
-
+sqlFormula = "INSERT INTO Patients_List VALUES(%s,%s,%s,%s,%s)"
+i=1
 for h in Patients_List:
 	# print(h)
-	toPut = (h["UserID"],h["AdmissionDate"],h["BloodNeeded"],h["HID"])
+	toPut = (i,h["UserID"],h["AdmissionDate"],h["BloodNeeded"],h["HID"])
 	# print(toPut)
+	i+=1
 	mycursor.execute(sqlFormula,toPut)
 	mydb.commit()
 
