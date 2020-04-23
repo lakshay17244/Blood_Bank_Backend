@@ -16,8 +16,8 @@ app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 mysql = MySQL(app)
 
@@ -48,46 +48,62 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
-
-@app.route('/getbbemployees',methods = ['POST'])
-def gbbe():
-	bbid = request.json['BBID']
+# Working
+@app.route('/getbbemployees/<userId>')
+def gbbe(userId):
+	# bbid = request.json['BBID']
 	cur = mysql.connection.cursor()
 	results = ""
-	query = "SELECT * FROM Blood_Bank_Employee where BBID=%s"%(bbid)	
+	query = "Select * from blood_bank_employee where BBID = (SELECT BBID FROM blood_bank_employee where UserID=%s)"%(userId)		
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()
+		for i in range(0,len(results)):
+			subquery = "Select * from user where UserID=%s"%(results[i]["UserID"])
+			cur.execute(subquery)
+			userDetails = cur.fetchall()[0]
+			results[i].update(userDetails)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
 	return jsonify(results)
 
-
-@app.route('/gethsemployees',methods = ['POST'])
-def ghse():
-	hid = request.json['HID']
+# Working
+@app.route('/gethsemployees/<userId>')
+def ghse(userId):
+	# hid = request.json['HID']
 	cur = mysql.connection.cursor()
 	results = ""
-	query = "SELECT * FROM Hospital_Employee where HID=%s"%(hid)	
+	query = "Select * from hospital_employee where HID = (SELECT HID FROM hospital_employee where UserID=%s)"%(userId)	
+	print(query)
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()
+		for i in range(0,len(results)):
+			subquery = "Select * from user where UserID=%s"%(results[i]["UserID"])
+			cur.execute(subquery)
+			userDetails = cur.fetchall()[0]
+			results[i].update(userDetails)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
 	return jsonify(results)
 
-
-@app.route('/getdcemployees',methods = ['POST'])
-def gdce():
-	dcid = request.json['DCID']
+# Working
+@app.route('/getdcemployees/<userId>')
+def gdce(userId):
+	# dcid = request.json['DCID']
 	cur = mysql.connection.cursor()
 	results = ""
-	query = "SELECT * FROM Donation_Centers_Employee where DCID=%s"%(dcid)	
+	query = "Select * from donation_centers_employee where DCID = (SELECT DCID FROM donation_centers_employee where UserID=%s)"%(userId)	
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()
+		for i in range(0,len(results)):
+			subquery = "Select * from user where UserID=%s"%(results[i]["UserID"])
+			cur.execute(subquery)
+			userDetails = cur.fetchall()[0]
+			results[i].update(userDetails)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
@@ -624,8 +640,36 @@ def getpastdonations(userId):
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
+# Working / Uses TEMPORARY TABLE
+@app.route('/getAdminOrganization/<userId>')
+def getAdminOrganization(userId):
+	cur = mysql.connection.cursor()
+	queries = []
+	queries.append("Create temporary table associatedOrganizations(UserID int, BBE bool, DCE bool, HE bool)")
+	queries.append("insert into associatedOrganizations select UserID,false,false,false from user where type='Admin'")
+	queries.append("update associatedOrganizations set BBE=true where UserID in (select UserID from blood_bank_employee)")
+	queries.append("update associatedOrganizations set DCE=true where UserID in (select UserID from donation_centers_employee)")
+	queries.append("update associatedOrganizations set HE=true where UserID in (select UserID from hospital_employee)")
+	queries.append("delete from associatedOrganizations where BBE=0 and DCE=0 and HE=0")
+	queries.append("select * from associatedOrganizations where UserID=%s"%(userId))
+	
+	
+	try: 
+		for query in queries:
+			print(query)
+			cur.execute(query)
+		cur.execute(query)
+		results = cur.fetchall()[0]
+		
+		subquery="drop table associatedOrganizations"
+		cur.execute(subquery)
+		return jsonify(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+
 #=============================================================================================#
-def getAssociatedOrganizations(userId):
+# def getAssociatedOrganizations(userId):
 	
 
 # Helper function to calculate age from DOB 
