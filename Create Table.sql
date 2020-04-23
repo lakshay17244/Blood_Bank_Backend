@@ -91,12 +91,13 @@ PRIMARY KEY (`HID`)
 
 CREATE TABLE `Patients_List`
 (
+ `PID` int NOT NULL,
  `UserID`  	int NOT NULL,
  `AdmissionDate` date NOT NULL,
  `BloodNeeded`   varchar(3) ,
-  `HID`  	int NOT NULL UNIQUE,
+  `HID`  	int NOT NULL,
 
-PRIMARY KEY (`UserID`, `AdmissionDate`) ,
+PRIMARY KEY (`PID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`),
 FOREIGN KEY (`HID`) REFERENCES Hospital(`HID`),
 CHECK (`BloodNeeded` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+'))

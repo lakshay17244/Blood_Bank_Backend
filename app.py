@@ -16,8 +16,8 @@ app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
-app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 mysql = MySQL(app)
 
@@ -48,6 +48,173 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
+
+@app.route('/getbbemployees',methods = ['POST'])
+def gbbe():
+	bbid = request.json['BBID']
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM Blood_Bank_Employee where BBID=%s"%(bbid)	
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+@app.route('/gethsemployees',methods = ['POST'])
+def ghse():
+	hid = request.json['HID']
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM Hospital_Employee where HID=%s"%(hid)	
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+@app.route('/getdcemployees',methods = ['POST'])
+def gdce():
+	dcid = request.json['DCID']
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM Donation_Centers_Employee where DCID=%s"%(dcid)	
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+@app.route('/enrollpatient',methods = ['POST'])
+def enrollPatient():
+
+	uid = request.json['UserID']
+	ad_date = request.json['AdmissionDate']
+	hid = request.json['HID']
+	blood_need = request.json['BloodNeeded']
+	
+	query = "SELECT HID FROM hospital_employee where UserID=%s"%(uid)
+	response = ""
+	
+	try: 
+		cur = mysql.connection.cursor()
+		cur.execute(query)
+		results = cur.fetchall()
+
+		if(len(results)==0):
+			return jsonify({'Error': 'True','message':'Not a hospital staff user'})
+		else:
+			query = "SELECT count(*) FROM patients_list"
+			cur.execute(query)
+
+			id_ = cur.fetchall()[0]['count(*)'] + 1
+			print_it(id_)
+
+			sqlFormula = "INSERT INTO patients_list VALUES(%s,%s,%s,%s,%s)"
+			toPut = (id_,uid,ad_date,blood_need,hid)
+			cur.execute(sqlFormula,toPut)
+			mysql.connection.commit()
+
+			response = {'patientID':id_, 'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+@app.route('/rmvemployee',methods = ['POST'])
+def rmvEmp():
+	userId = request.json['UserID']
+	place = request.json['place']
+
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM user where UserID=%s"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		if(len(results)==0):
+			return jsonify({'Error': 'True','message':'No such user'})
+		else:
+			
+			if(place == 'hospital'):
+				hid = request.json['HID']
+				sqlFormula = "DELETE FROM Hospital_Employee WHERE UserID=%s AND HID=%s"%(userId,hid)
+			
+			elif(place == 'blood_bank'):
+				bbid = request.json['BBID']
+				sqlFormula = "DELETE FROM Blood_Bank_Employee WHERE UserID=%s AND BBID=%s"%(userId,bbid)
+			
+			elif(place == 'donation_centers'):
+				dcid = request.json['DCID']
+				sqlFormula = "DELETE FROM Donation_Centers_Employee WHERE UserID=%s AND DCID=%s"%(userId,dcid)
+			
+			else:
+				return  jsonify({'Error': 'True','message':'Not a valid place'})
+			
+			cur.execute(sqlFormula)
+			mysql.connection.commit()
+
+			response = {'status':200,'message':'Successfully Deleted Employee'}
+			return jsonify(response)
+	
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+
+@app.route('/addemployee',methods = ['POST'])
+def addEmp():
+	userId = request.json['UserID']
+	place = request.json['place']
+
+	cur = mysql.connection.cursor()
+	query = " SELECT * FROM user where UserID=%s"%(userId)
+
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		if(len(results)==0):
+			return jsonify({'Error': 'True','message':'No such user'})
+		else:
+			
+			if(place == 'hospital'):
+				hid = request.json['HID']
+				sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
+				toPut = (userId,hid)
+			
+			elif(place == 'blood_bank'):
+				bbid = request.json['BBID']
+				sqlFormula = "INSERT INTO Blood_Bank_Employee VALUES(%s,%s)"
+				toPut = (userId,bbid)
+
+			elif(place == 'donation_centers'):
+				dcid = request.json['DCID']
+				sqlFormula = "INSERT INTO Donation_Centers_Employee VALUES(%s,%s)"
+				toPut = (userId,dcid)
+
+			else:
+				return  jsonify({'Error': 'True','message':'Not a valid place'})
+			
+			cur.execute(sqlFormula,toPut)
+			mysql.connection.commit()
+
+			response = {'status':200,'message':'Successfully Added Employee'}
+			return jsonify(response)
+	
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
 
 # Working / Uses Transaction
 @app.route('/updateuser',methods = ['POST'])
@@ -302,49 +469,6 @@ def addHospital():
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
-
-@app.route('/addemployee',methods = ['POST'])
-def addEmp():
-	userId = request.json['UserID']
-	place = request.json['place']
-
-	cur = mysql.connection.cursor()
-	query = " SELECT * FROM user where UserID=%s"%(userId)
-
-	try: 
-		cur.execute(query)
-		results = cur.fetchall()
-		if(len(results)==0):
-			return jsonify({'Error': 'True','message':'No such user'})
-		else:
-			
-			if(place == 'hospital'):
-				hid = request.json['HID']
-				sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
-				toPut = (userId,hid)
-			
-			elif(place == 'blood_bank'):
-				bbid = request.json['BBID']
-				sqlFormula = "INSERT INTO Blood_Bank_Employee VALUES(%s,%s)"
-				toPut = (userId,bbid)
-
-			elif(place == 'donation_centers'):
-				dcid = request.json['DCID']
-				sqlFormula = "INSERT INTO Donation_Centers_Employee VALUES(%s,%s)"
-				toPut = (userId,dcid)
-
-			else:
-				return  jsonify({'Error': 'True','message':'Not a valid place'})
-			
-			cur.execute(sqlFormula,toPut)
-			mysql.connection.commit()
-
-			response = {'status':200,'message':'Success Add Emp'}
-			return jsonify(response)
-	
-	except Exception as e:
-		return jsonify({'Error': 'True','message': str(e)})
-
 # Working
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
@@ -517,3 +641,5 @@ def print_it(s):
 
 #Command to run the app
 app.run()
+
+#=============================================================================================#
