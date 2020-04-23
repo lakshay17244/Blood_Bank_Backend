@@ -53,7 +53,7 @@ sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
 i=1
 for h in BloodBanks:
 	# print(h)
-	toPut = (h["Name"]+" Blood Bank",getPincode(),h["Address"],i,randint(0,h["TotalCapacity"]),h["TotalCapacity"])
+	toPut = (h["Name"]+" Blood Bank",getPincode(),i,h["Address"],randint(0,h["TotalCapacity"]),h["TotalCapacity"])
 	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
