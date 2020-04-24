@@ -48,10 +48,26 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
+
+# Working
+@app.route('/getDonatedBlood/<userId>')
+def getDonatedBlood(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM connectgroup.donated_blood where DCID=(select DCID from donation_centers_employee where UserID=%s)"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+
 # Working
 @app.route('/getbbemployees/<userId>')
 def gbbe(userId):
-	# bbid = request.json['BBID']
 	cur = mysql.connection.cursor()
 	results = ""
 	query = "Select * from blood_bank_employee where BBID = (SELECT BBID FROM blood_bank_employee where UserID=%s)"%(userId)		
@@ -68,10 +84,11 @@ def gbbe(userId):
 
 	return jsonify(results)
 
+
+
 # Working
 @app.route('/gethsemployees/<userId>')
 def ghse(userId):
-	# hid = request.json['HID']
 	cur = mysql.connection.cursor()
 	results = ""
 	query = "Select * from hospital_employee where HID = (SELECT HID FROM hospital_employee where UserID=%s)"%(userId)	
@@ -89,10 +106,11 @@ def ghse(userId):
 
 	return jsonify(results)
 
+
+
 # Working
 @app.route('/getdcemployees/<userId>')
 def gdce(userId):
-	# dcid = request.json['DCID']
 	cur = mysql.connection.cursor()
 	results = ""
 	query = "Select * from donation_centers_employee where DCID = (SELECT DCID FROM donation_centers_employee where UserID=%s)"%(userId)	
@@ -108,6 +126,7 @@ def gdce(userId):
 		return jsonify({'Error': 'True','message': str(e)})
 
 	return jsonify(results)
+
 
 
 @app.route('/enrollpatient',methods = ['POST'])
@@ -149,6 +168,8 @@ def enrollPatient():
 	return jsonify(response)
 
 
+
+# Working
 @app.route('/rmvemployee',methods = ['POST'])
 def rmvEmp():
 	userId = request.json['UserID']
@@ -189,6 +210,8 @@ def rmvEmp():
 		return jsonify({'Error': 'True','message': str(e)})
 
 
+
+# Working
 @app.route('/addemployee',methods = ['POST'])
 def addEmp():
 	userId = request.json['UserID']
@@ -229,7 +252,8 @@ def addEmp():
 			return jsonify(response)
 	
 	except Exception as e:
-		return jsonify({'Error': 'True','message': str(e)})
+		return jsonify({'status':401,'Error': 'True','message': str(e)})
+
 
 
 # Working / Uses Transaction
@@ -282,6 +306,8 @@ def updateUser():
 	#Send back the response
 	return jsonify(response)
 
+
+
 # Working
 @app.route('/getemergencyrequirements/<userId>')
 def getemergencyrequirements(userId):
@@ -302,6 +328,8 @@ def getemergencyrequirements(userId):
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/getallhospitals')
 def getallhospitals():
@@ -314,6 +342,8 @@ def getallhospitals():
 		return jsonify(results)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
 
 # Working
 @app.route('/getnearbyhospitals/<userId>')
@@ -328,6 +358,8 @@ def getnearbyhospitals(userId):
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/getalldc')
 def getalldc():
@@ -340,6 +372,8 @@ def getalldc():
 		return jsonify(results)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
 
 # Working
 @app.route('/getnearbydc/<userId>')
@@ -354,6 +388,8 @@ def getnearbydc(userId):
 		return jsonify(results)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
 
 # Working / Uses Transaction
 @app.route('/addbloodbank',methods = ['POST'])
@@ -402,6 +438,8 @@ def addBloodBank():
 		mycursor.execute("ROLLBACK")
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/adddonationcenter',methods = ['POST'])
 def addDonCen():
@@ -443,6 +481,8 @@ def addDonCen():
 
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
+
+
 
 # Working
 @app.route('/addhospital',methods = ['POST'])
@@ -486,6 +526,8 @@ def addHospital():
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/donateblood',methods = ['POST'])
 def donateBlood():
@@ -517,6 +559,8 @@ def donateBlood():
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/showprofile/<userId>')
 def showProfile(userId):
@@ -540,6 +584,8 @@ def showProfile(userId):
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
 
+
+
 # Working
 @app.route('/login', methods=['POST'])
 def loginFunction():
@@ -558,6 +604,8 @@ def loginFunction():
 		return jsonify(response)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
 
 # Working
 @app.route('/createuser', methods=['POST'])
@@ -616,6 +664,8 @@ def createUser():
 	#Send back the response
 	return jsonify(response)
 
+
+
 # Working
 @app.route('/getpastdonations/<userId>')
 def getpastdonations(userId):
@@ -639,6 +689,8 @@ def getpastdonations(userId):
 		return jsonify(results)
 	except Exception as e:
 		return jsonify({'Error': 'True','message': str(e)})
+
+
 
 # Working / Uses TEMPORARY TABLE
 @app.route('/getAdminOrganization/<userId>')
@@ -669,8 +721,6 @@ def getAdminOrganization(userId):
 
 
 #=============================================================================================#
-# def getAssociatedOrganizations(userId):
-	
 
 # Helper function to calculate age from DOB 
 def calculateAge(birthDate): 
