@@ -113,7 +113,6 @@ def updateBB():
 	return jsonify(response)
 
 
-
 # Working / Uses Transaction
 @app.route('/updateDC',methods = ['POST'])
 def updateDC():
@@ -146,6 +145,27 @@ def updateDC():
 
 	#Send back the response
 	return jsonify(response)
+
+
+# Working
+@app.route('/getBBStoredBlood/<userId>')
+def getBBStoredBlood(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = """SELECT BloodGroup,count(*) as Amount FROM donated_blood where 
+				Available=1
+				and
+				DCID = (Select DCID from donation_centers where BBID=(select BBID from blood_bank_employee where UserID=%s))
+				group by BloodGroup"""%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+		print(results)
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
 
 
 # Working
@@ -694,7 +714,7 @@ def donateBlood():
 	userIdArray = request.json['UserID']
 	AdminID = request.json['AdminID']
 	dateRec = request.json['DateRecieved']
-	amt = request.json['Amount']
+	# amt = request.json['Amount']
 	try:
 		cur = mysql.connection.cursor()
 		sqlFormula = "INSERT INTO Donated_Blood VALUES(%s,%s,%s,%s,%s,%s)"
@@ -708,7 +728,7 @@ def donateBlood():
 			cur.execute(subquery)
 			bloodGroup = cur.fetchall()[0]['BloodGroup']
 			# Add Donation Record
-			toPut = (user,dateRec,bloodGroup,amt[i],DCID,1)
+			toPut = (user,dateRec,bloodGroup,1,DCID,1)
 			print(sqlFormula,toPut)
 			cur.execute(sqlFormula,toPut)
 			mysql.connection.commit()
