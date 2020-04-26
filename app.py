@@ -16,8 +16,8 @@ app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-app.config['MYSQL_PASSWORD'] = 'lakshay'
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 mysql = MySQL(app)
 
@@ -76,6 +76,40 @@ def sendBloodToBloodBank():
 
 	#Send back the response
 	return jsonify(response)
+
+# Working / Uses Transaction
+@app.route('/updateH',methods = ['POST'])
+def updateH():
+	HID = request.json['HID']
+	Name = request.json['Name']
+	Address = request.json['Address']
+	Pincode = request.json['Pincode']
+
+	response = ""
+	
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		#Update values in donation_centers table
+		sqlFormula = "UPDATE hospital SET Name=%s,Address=%s,Pincode=%s WHERE HID=%s"
+		toPut = (Name,Address,Pincode,HID)
+		mycursor.execute(sqlFormula,toPut)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
 
 
 # Working / Uses Transaction
@@ -166,6 +200,19 @@ def getBBStoredBlood(userId):
 
 	return jsonify(results)
 
+# Working
+@app.route('/getHDetails/<userId>')
+def getHDetails(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM hospital where HID=(select HID from hospital_employee where UserID=%s)"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
 
 
 # Working
