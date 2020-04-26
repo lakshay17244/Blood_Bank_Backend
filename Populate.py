@@ -5,8 +5,8 @@ from random import randint
 mydb = mysql.connector.connect(
 	host="localhost",
 	user="root",
-	# passwd="lakshay",
-	passwd="dbms_123",
+	passwd="lakshay",
+	# passwd="dbms_123",
 	database="ConnectGroup"
 )
 

@@ -49,6 +49,166 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
+
+# Working
+@app.route('/sendBloodToBloodBank',methods = ['POST'])
+def sendBloodToBloodBank():
+	DCID = request.json['DCID']
+	response = ""
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		#Update values in donation_centers table
+		sqlFormula = "Update donated_blood set Available=1 where DCID=%s and Available=0"%(DCID)
+		mycursor.execute(sqlFormula)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+# Working / Uses Transaction
+@app.route('/updateBB',methods = ['POST'])
+def updateBB():
+	BBID = request.json['BBID']
+	Name = request.json['Name']
+	Address = request.json['Address']
+	Pincode = request.json['Pincode']
+	TotalCapacity = request.json['TotalCapacity']
+
+	response = ""
+	
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		#Update values in donation_centers table
+		sqlFormula = "UPDATE blood_bank SET Name=%s,Address=%s,Pincode=%s,TotalCapacity=%s WHERE BBID=%s"
+		toPut = (Name,Address,Pincode,TotalCapacity,BBID)
+		mycursor.execute(sqlFormula,toPut)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+
+# Working / Uses Transaction
+@app.route('/updateDC',methods = ['POST'])
+def updateDC():
+	DCID = request.json['DCID']
+	Name = request.json['Name']
+	Address = request.json['Address']
+	Pincode = request.json['Pincode']
+
+	response = ""
+	
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		#Update values in donation_centers table
+		sqlFormula = "UPDATE donation_centers SET Name=%s,Address=%s,Pincode=%s WHERE DCID=%s"
+		toPut = (Name,Address,Pincode,DCID)
+		mycursor.execute(sqlFormula,toPut)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+# Working
+@app.route('/getBBDetails/<userId>')
+def getBBDetails(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM blood_bank where BBID=(select BBID from blood_bank_employee where UserID=%s)"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+# Working
+@app.route('/getDCDetails/<userId>')
+def getDCDetails(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM donation_centers where DCID=(select DCID from donation_centers_employee where UserID=%s)"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+# Working / Uses twice nested query
+@app.route('/getAssociatedDonationCenter/<UserID>')
+def getAssociatedDonationCenter(UserID):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "Select * from donation_centers where DCID in (SELECT DCID FROM donation_centers where BBID = (Select BBID from blood_bank_employee where UserID=%s))"%(UserID)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+# Working / Uses twice nested query
+@app.route('/getAssociatedBloodBank/<userId>')
+def getAssociatedBloodBank(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "Select * from blood_bank where BBID = (Select BBID from donation_centers where DCID= (SELECT DCID FROM donation_centers_employee where UserID=%s))"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
+
+
 # Working
 @app.route('/getDonatedBlood/<userId>')
 def getDonatedBlood(userId):
