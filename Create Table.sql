@@ -77,6 +77,19 @@ CHECK (`BloodGroup` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+'))
 );
 
 
+CREATE TABLE `Appointment`
+( 
+ `AID`  	int UNIQUE,
+ `UserID`  		int NOT NULL ,
+ `DCID`  	int NOT NULL ,
+ `Date` 	date NOT NULL ,
+
+PRIMARY KEY (`AID`) ,
+FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
+FOREIGN KEY (`DCID`) REFERENCES Donation_Centers(`DCID`)
+);
+
+
 CREATE TABLE `Hospital`
 (
  `HID`              int UNIQUE,

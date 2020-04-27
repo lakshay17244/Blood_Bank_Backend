@@ -115,6 +115,14 @@ for h in ProfilePictures:
 	mydb.commit()
 
 
+############ Appointment TABLE ############
+sqlFormula = "INSERT INTO Appointment VALUES(%s,%s,%s,%s)"
+for i in range(1,6):
+	toPut = (i,randint(1,100),randint(1,50),Patients_List[i]["AdmissionDate"])
+	mycursor.execute(sqlFormula,toPut)
+	mydb.commit()
+
+
 ############ Hospital_Employee TABLE ############
 
 sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
