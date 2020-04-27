@@ -50,6 +50,63 @@ def getTableDetails(table):
 #=============================================================================================#
 
 
+@app.route('/getAppointment',methods = ['POST'])
+def getApp():
+	DCID = request.json['DCID']
+	#SEND request.json['Date'] for date specific query 
+
+	response = ""
+	cur = mysql.connection.cursor()	
+
+	try:
+		query = "SELECT * FROM Appointment WHERE DCID=%s"%(DCID)
+		if("Date" in request.json.keys()):
+			query = query + ' AND DATE="%s"'%(request.json['Date'])
+
+		cur.execute(query)
+		response = cur.fetchall()
+
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(response)
+
+
+@app.route('/makeAppointment',methods = ['POST'])
+def makeApp():
+	dcid = request.json['DCID']
+	uid = request.json['UserID']
+	date = request.json['Date']
+
+	response = ""
+	cur = mysql.connection.cursor()	
+
+	try:
+		query = "SELECT count(*) FROM Appointment"
+		cur.execute(query)
+		aid = cur.fetchall()[0]['count(*)'] + 1
+		print_it(aid)
+
+		# BEGIN TRANSACTION
+		cur.execute("BEGIN")
+
+		query = "INSERT INTO Appointment VALUES(%s,%s,%s,%s)"
+		toPut = (aid,uid,dcid,date)
+		cur.execute(query,toPut)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		cur.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(response)
+
+
 # Working
 @app.route('/sendBloodToBloodBank',methods = ['POST'])
 def sendBloodToBloodBank():
