@@ -143,9 +143,6 @@ for i in range(1,100):
 		mydb.commit()
 
 
-# -------------------------------------------------------------------------- #
-
-
 # Delete Donor Type Associated with Blood Bank
 sqlFormula = """Delete FROM blood_bank_employee where UserID in (Select UserID from user where type="Donor")"""
 mycursor.execute(sqlFormula)
@@ -182,5 +179,3 @@ mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_available_donor_BG ON available_donor (BloodGroup)"
 mycursor.execute(sqlFormula)
 mydb.commit()
-
-# -------------------------------------------------------------------------- #

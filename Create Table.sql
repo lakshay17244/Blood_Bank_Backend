@@ -40,7 +40,7 @@ CREATE TABLE `Donation_Centers`
  `DCID`    		int UNIQUE,
  `Pincode` 		varchar(50) NOT NULL ,
  `Address` 		varchar(60) NOT NULL ,
- `BBID`  		int NOT NULL UNIQUE ,
+ `BBID`  		int NOT NULL ,
 
 
 PRIMARY KEY (`DCID`) ,
