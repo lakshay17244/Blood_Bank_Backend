@@ -142,3 +142,45 @@ for i in range(1,100):
 		mycursor.execute(sqlFormula,toPut)
 		mydb.commit()
 
+
+# -------------------------------------------------------------------------- #
+
+
+# Delete Donor Type Associated with Blood Bank
+sqlFormula = """Delete FROM blood_bank_employee where UserID in (Select UserID from user where type="Donor")"""
+mycursor.execute(sqlFormula)
+mydb.commit()
+
+# Delete Donor Type Associated with Hospital
+sqlFormula = """Delete FROM hospital_employee where UserID in (Select UserID from user where type="Donor")"""
+mycursor.execute(sqlFormula)
+mydb.commit()
+
+# Delete Donor Type Associated with Donation Center
+sqlFormula = """Delete FROM donation_centers_employee where UserID in (Select UserID from user where type="Donor")"""
+mycursor.execute(sqlFormula)
+mydb.commit()
+
+
+
+# ------------------------------------- Indexes ------------------------------------- #
+
+# Pincode
+sqlFormula = "CREATE INDEX idx_user_Pincode ON user (Pincode)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_donation_centers_Pincode ON donation_centers (Pincode)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_hospital_Pincode ON hospital (Pincode)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_blood_bank_Pincode ON blood_bank (Pincode)"
+mycursor.execute(sqlFormula)
+mydb.commit()
+
+# Blood Group
+sqlFormula = "CREATE INDEX idx_donated_blood_BG ON donated_blood (BloodGroup)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_available_donor_BG ON available_donor (BloodGroup)"
+mycursor.execute(sqlFormula)
+mydb.commit()
+
+# -------------------------------------------------------------------------- #
