@@ -2,13 +2,21 @@ import mysql.connector
 from data import *
 from random import randint
 
+# mydb = mysql.connector.connect(
+# 	host="localhost",
+# 	user="root",
+# 	# passwd="lakshay",
+# 	passwd="dbms_123",
+# 	database="ConnectGroup"
+# )
+
 mydb = mysql.connector.connect(
-	host="localhost",
-	user="root",
-	# passwd="lakshay",
-	passwd="dbms_123",
-	database="ConnectGroup"
+	host="remotemysql.com",
+	user="swMUYUcOTM",
+	passwd="LlyHn4U47w",
+	database="swMUYUcOTM"
 )
+
 
 mycursor=mydb.cursor()
 
@@ -18,7 +26,7 @@ def getPincode():
 	return Pincodes[randint(0,9)]
 
 ############ USER TABLE ############
-sqlFormula = "INSERT INTO user VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
+sqlFormula = "INSERT INTO User VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
 i=1
 for user in Users:
 	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],getPincode(),user["Age"])
@@ -27,7 +35,7 @@ for user in Users:
 	mydb.commit()
 
 ############ HOSPITAL TABLE ############
-sqlFormula = "INSERT INTO hospital VALUES(%s,%s,%s,%s,%s)"
+sqlFormula = "INSERT INTO Hospital VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in Hospitals:
 	# print(h)
@@ -38,7 +46,7 @@ for h in Hospitals:
 	mydb.commit()
 
 ############ PASSWORDS TABLE ############
-sqlFormula = "INSERT INTO passwords VALUES(%s,%s,%s)"
+sqlFormula = "INSERT INTO Passwords VALUES(%s,%s,%s)"
 i=1
 for passwd in Passwords:
 	# print(passwd)
@@ -115,6 +123,14 @@ for h in ProfilePictures:
 	mydb.commit()
 
 
+############ Appointment TABLE ############
+sqlFormula = "INSERT INTO Appointment VALUES(%s,%s,%s,%s)"
+for i in range(1,6):
+	toPut = (i,randint(1,100),randint(1,50),Patients_List[i]["AdmissionDate"])
+	mycursor.execute(sqlFormula,toPut)
+	mydb.commit()
+
+
 ############ Hospital_Employee TABLE ############
 
 sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
@@ -136,17 +152,17 @@ for i in range(1,100):
 
 
 # Delete Donor Type Associated with Blood Bank
-sqlFormula = """Delete FROM blood_bank_employee where UserID in (Select UserID from user where type="Donor")"""
+sqlFormula = """Delete FROM Blood_Bank_Employee where UserID in (Select UserID from User where type="Donor")"""
 mycursor.execute(sqlFormula)
 mydb.commit()
 
 # Delete Donor Type Associated with Hospital
-sqlFormula = """Delete FROM hospital_employee where UserID in (Select UserID from user where type="Donor")"""
+sqlFormula = """Delete FROM Hospital_Employee where UserID in (Select UserID from User where type="Donor")"""
 mycursor.execute(sqlFormula)
 mydb.commit()
 
 # Delete Donor Type Associated with Donation Center
-sqlFormula = """Delete FROM donation_centers_employee where UserID in (Select UserID from user where type="Donor")"""
+sqlFormula = """Delete FROM Donation_Centers_Employee where UserID in (Select UserID from User where type="Donor")"""
 mycursor.execute(sqlFormula)
 mydb.commit()
 
@@ -155,20 +171,20 @@ mydb.commit()
 # ------------------------------------- Indexes ------------------------------------- #
 
 # Pincode
-sqlFormula = "CREATE INDEX idx_user_Pincode ON user (Pincode)"
+sqlFormula = "CREATE INDEX idx_user_Pincode ON User (Pincode)"
 mycursor.execute(sqlFormula)
-sqlFormula = "CREATE INDEX idx_donation_centers_Pincode ON donation_centers (Pincode)"
+sqlFormula = "CREATE INDEX idx_donation_centers_Pincode ON Donation_Centers (Pincode)"
 mycursor.execute(sqlFormula)
-sqlFormula = "CREATE INDEX idx_hospital_Pincode ON hospital (Pincode)"
+sqlFormula = "CREATE INDEX idx_hospital_Pincode ON Hospital (Pincode)"
 mycursor.execute(sqlFormula)
-sqlFormula = "CREATE INDEX idx_blood_bank_Pincode ON blood_bank (Pincode)"
+sqlFormula = "CREATE INDEX idx_blood_bank_Pincode ON Blood_Bank (Pincode)"
 mycursor.execute(sqlFormula)
 mydb.commit()
 
 # Blood Group
-sqlFormula = "CREATE INDEX idx_donated_blood_BG ON donated_blood (BloodGroup)"
+sqlFormula = "CREATE INDEX idx_donated_blood_BG ON Donated_Blood (BloodGroup)"
 mycursor.execute(sqlFormula)
-sqlFormula = "CREATE INDEX idx_available_donor_BG ON available_donor (BloodGroup)"
+sqlFormula = "CREATE INDEX idx_available_donor_BG ON Available_Donor (BloodGroup)"
 mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_patients_list_BG ON patients_list (BloodNeeded)"
 mycursor.execute(sqlFormula)
