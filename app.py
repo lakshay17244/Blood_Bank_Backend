@@ -16,8 +16,8 @@ app.config['MYSQL_DB'] = 'ConnectGroup'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
-app.config['MYSQL_PASSWORD'] = 'dbms_123'
+app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 mysql = MySQL(app)
 
@@ -27,7 +27,7 @@ mysql = MySQL(app)
 
 @app.route('/')
 def home():
-	return "<h1>Hello World</h1>"
+	return "<h1>This is the backend for our DBMS Project - Blood Bank Management System</h1>"
 
 
 @app.route('/table/<table>')
@@ -48,6 +48,87 @@ def getTableDetails(table):
 
 
 #=============================================================================================#
+
+# Working / Uses Transaction
+@app.route('/addPatient',methods = ['POST'])
+def addPatient():
+	BloodGroup = request.json['BloodGroup']
+	AdmissionDate = request.json['AdmissionDate']
+	UserID = request.json['UserID']
+	HID = request.json['HID']
+
+	response = ""
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		sqlFormula = "Select max(PID)+1 from patients_list"
+		mycursor.execute(sqlFormula)
+		PID = mycursor.fetchall()[0]['max(PID)+1']
+
+		#Insert values in patients_list table
+		sqlFormula = "INSERT INTO patients_list values (%s,%s,%s,%s,%s)"
+		toPut = (PID,UserID,AdmissionDate,BloodGroup,HID)
+		print(sqlFormula,toPut)
+		mycursor.execute(sqlFormula,toPut)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+# Working / Uses Transaction
+@app.route('/removePatient',methods = ['POST'])
+def removePatient():
+	PID = request.json['PID']
+	response = ""
+	try:
+		mycursor = mysql.connection.cursor()	
+		# BEGIN TRANSACTION
+		mycursor.execute("BEGIN")
+		
+		#Delete row in patients_list table
+		sqlFormula = "DELETE FROM patients_list where PID = %s"%(PID)
+		mycursor.execute(sqlFormula)
+
+		# If no exception, then COMMIT the transaction
+		mysql.connection.commit()
+		#Make successful response
+		response = {'status': 200, 'message':'Success'}
+	
+	except Exception as e:
+		# If exception occurs, ROLLBACK!!
+		mycursor.execute("ROLLBACK")
+		return jsonify({'Error': 'True','message': str(e)})
+
+	#Send back the response
+	return jsonify(response)
+
+
+# Working
+@app.route('/getPatientDetails/<userId>')
+def getPatientDetails(userId):
+	cur = mysql.connection.cursor()
+	results = ""
+	query = "SELECT * FROM patients_list where HID = (SELECT HID from hospital_employee where UserID = %s)"%(userId)		
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as e:
+		return jsonify({'Error': 'True','message': str(e)})
+
+	return jsonify(results)
+
 
 
 # Working

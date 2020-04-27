@@ -170,4 +170,6 @@ sqlFormula = "CREATE INDEX idx_donated_blood_BG ON donated_blood (BloodGroup)"
 mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_available_donor_BG ON available_donor (BloodGroup)"
 mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_patients_list_BG ON patients_list (BloodNeeded)"
+mycursor.execute(sqlFormula)
 mydb.commit()
