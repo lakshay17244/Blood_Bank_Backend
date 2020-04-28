@@ -2,20 +2,20 @@ import mysql.connector
 from data import *
 from random import randint
 
-# mydb = mysql.connector.connect(
-# 	host="localhost",
-# 	user="root",
-# 	# passwd="lakshay",
-# 	passwd="dbms_123",
-# 	database="ConnectGroup"
-# )
-
 mydb = mysql.connector.connect(
-	host="remotemysql.com",
-	user="swMUYUcOTM",
-	passwd="LlyHn4U47w",
-	database="swMUYUcOTM"
+	host="localhost",
+	user="root",
+	passwd="lakshay",
+	# passwd="dbms_123",
+	database="ConnectGroup"
 )
+
+# mydb = mysql.connector.connect(
+# 	host="remotemysql.com",
+# 	user="swMUYUcOTM",
+# 	passwd="LlyHn4U47w",
+# 	database="swMUYUcOTM"
+# )
 
 
 mycursor=mydb.cursor()
@@ -186,6 +186,6 @@ sqlFormula = "CREATE INDEX idx_donated_blood_BG ON Donated_Blood (BloodGroup)"
 mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_available_donor_BG ON Available_Donor (BloodGroup)"
 mycursor.execute(sqlFormula)
-sqlFormula = "CREATE INDEX idx_patients_list_BG ON patients_list (BloodNeeded)"
+sqlFormula = "CREATE INDEX idx_patients_list_BG ON Patients_List (BloodNeeded)"
 mycursor.execute(sqlFormula)
 mydb.commit()

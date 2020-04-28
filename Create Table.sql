@@ -68,7 +68,7 @@ CREATE TABLE `Donated_Blood`
  `BloodGroup`   varchar(3) ,
  `Amount`       int DEFAULT 1,
  `DCID`  		int NOT NULL ,
- `Available`    boolean DEFAULT true ,
+ `Available`    int DEFAULT 0 ,
 
 PRIMARY KEY (`UserID`, `DateRecieved`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
@@ -99,6 +99,17 @@ CREATE TABLE `Hospital`
  `AdmittedPatients` int NOT NULL ,
 
 PRIMARY KEY (`HID`)
+);
+
+CREATE TABLE `EmergencyRequirements`
+(
+ `EID`              int UNIQUE,
+ `BloodNeeded`   varchar(3) ,
+ `DoctorID`  	int NOT NULL,
+ `DateRecieved` date NOT NULL,
+FOREIGN KEY (`DoctorID`) REFERENCES User(`UserID`),
+CHECK (`BloodNeeded` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+')),
+PRIMARY KEY (`EID`)
 );
 
 
