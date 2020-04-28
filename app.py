@@ -70,20 +70,20 @@ def getpp(uid):
 
 	return jsonify(results)
 
-
-@app.route('/getAppointment',methods = ['POST'])
+# Working / Uses Triple join!
+@app.route('/getAppointment',methods=['POST'])
 def getApp():
-	DCID = request.json['DCID']
+	UserID = request.json['UserID']
 	#SEND request.json['Date'] for date specific query 
-
 	response = ""
 	cur = mysql.connection.cursor()	
-
 	try:
-		query = "SELECT * FROM Appointment WHERE DCID=%s"%(DCID)
+		query = """ SELECT Appointment.*,user.Username as Name,user.Phone,available_donor.BloodGroup FROM 
+					Appointment join user on appointment.UserID=user.UserID 
+					join available_donor on available_donor.UserID=user.UserID
+					WHERE DCID=(select DCID from donation_centers_employee where UserID=%s)"""%(UserID)
 		if("Date" in request.json.keys()):
-			query = query + ' AND DATE="%s"'%(request.json['Date'])
-
+			query = query + ' AND Appointment.DATE="%s"'%(request.json['Date'])
 		cur.execute(query)
 		response = cur.fetchall()
 
@@ -166,7 +166,7 @@ def addemergencyrequirement():
 	return jsonify(response)
 
 
-# Working
+# Working / Uses join
 @app.route('/getDonorERNearby/<UserID>')
 def getDonorERNearby(UserID):
 	cur = mysql.connection.cursor()
@@ -182,7 +182,7 @@ def getDonorERNearby(UserID):
 
 	return jsonify(results)
 
-# Working
+# Working / Uses Join
 @app.route('/getDonorERAll/<UserID>')
 def getDonorERAll(UserID):
 	cur = mysql.connection.cursor()
@@ -1262,8 +1262,8 @@ def print_it(s):
 		print(s)
 
 #=============================================================================================#
-
 #Command to run the app
-app.run()
+if __name__ == "__main__":
+	app.run()
 
 #=============================================================================================#
