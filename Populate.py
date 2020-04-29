@@ -21,6 +21,7 @@ mydb = mysql.connector.connect(
 mycursor=mydb.cursor()
 
 Pincodes = ["110010","110020","110030","110040","110050","110060","110070","110090","118900","100200"]
+TotalCapacity = [5000,10000]
 
 def getPincode():
 	return Pincodes[randint(0,9)]
@@ -61,7 +62,8 @@ sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
 i=1
 for h in BloodBanks:
 	# print(h)
-	toPut = (h["Name"]+" Blood Bank",getPincode(),i,h["Address"],randint(0,h["TotalCapacity"]),h["TotalCapacity"])
+	TCap = TotalCapacity[randint(0,1)]
+	toPut = (h["Name"]+" Blood Bank",getPincode(),i,h["Address"],randint(0,TCap),TCap)
 	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
