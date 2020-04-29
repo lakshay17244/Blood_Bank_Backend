@@ -56,6 +56,23 @@ def getTableDetails(table):
 
 #=============================================================================================#
 
+# Working
+@app.route('/getWTDDonors')
+def getWTDDonors():
+	cur = mysql.connection.cursor()
+	query = """select distinct user.Email from available_donor join user on available_donor.UserID = user.UserID
+				where available_donor.WillingToDonate=1"""
+	# print_it(query)
+	results = ""
+	try: 
+		cur.execute(query)
+		results = cur.fetchall()
+	except Exception as E:
+		results = {'Error': str(E)}
+	return jsonify(results)
+
+
+
 @app.route('/profilepic/<uid>')
 def getpp(uid):
 	cur = mysql.connection.cursor()
