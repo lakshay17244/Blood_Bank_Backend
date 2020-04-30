@@ -5,9 +5,11 @@ from flask_cors import CORS
 import logging
 import sys
 import mysql.connector
+from os import environ
 #=============================================================================================#
 
 app = Flask(__name__)
+
 # Enable Logging for Heroku
 app.logger.addHandler(logging.StreamHandler(sys.stdout))
 app.logger.setLevel(logging.ERROR)
@@ -33,12 +35,15 @@ app.config["DEBUG"] = True
 # app.config['MYSQL_DB'] = 'swMUYUcOTM'
 # app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
 
+# For local heroku server dev
+# app.config.from_object('config')
+
 
 # HEROKU APP
-app.config['MYSQL_USER'] = '***REMOVED***'
-app.config['MYSQL_HOST'] = "***REMOVED***"
-app.config['MYSQL_DB'] = '***REMOVED***'
-app.config['MYSQL_PASSWORD'] = '***REMOVED***'
+app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
+app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
+app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
+app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
 
 
 mysql = MySQL(app)
