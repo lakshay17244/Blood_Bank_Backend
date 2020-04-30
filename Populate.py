@@ -2,13 +2,13 @@ import mysql.connector
 from data import *
 from random import randint
 
-mydb = mysql.connector.connect(
-	host="localhost",
-	user="root",
-	passwd="lakshay",
-	# passwd="dbms_123",
-	database="ConnectGroup"
-)
+# mydb = mysql.connector.connect(
+# 	host="localhost",
+# 	user="root",
+# 	passwd="lakshay",
+# 	# passwd="dbms_123",
+# 	database="ConnectGroup"
+# )
 
 # mydb = mysql.connector.connect(
 # 	host="remotemysql.com",
@@ -16,6 +16,13 @@ mydb = mysql.connector.connect(
 # 	passwd="LlyHn4U47w",
 # 	database="swMUYUcOTM"
 # )
+
+mydb = mysql.connector.connect(
+	host="us-cdbr-iron-east-01.cleardb.net",
+	user="b7a5b3c4153c9b",
+	passwd="47ca5c8e",
+	database="heroku_f4655c55cf4efcf"
+)
 
 
 mycursor=mydb.cursor()
@@ -25,6 +32,8 @@ TotalCapacity = [5000,10000]
 
 def getPincode():
 	return Pincodes[randint(0,9)]
+
+mycursor.execute("use heroku_f4655c55cf4efcf")
 
 ############ USER TABLE ############
 sqlFormula = "INSERT INTO User VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"

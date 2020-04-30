@@ -1,14 +1,15 @@
-#C:/Users/Jay/Anaconda3/python app.py
-
 from flask import Flask,jsonify,request
 from flask_mysqldb import MySQL 
 from datetime import date
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
+
 
 #=============================================================================================#
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
@@ -58,6 +59,7 @@ def getTableDetails(table):
 
 # Working
 @app.route('/getWTDDonors/<BG>')
+@cross_origin()
 def getWTDDonors(BG):
 	cur = mysql.connection.cursor()
 	query = """select distinct user.Email from available_donor join user on available_donor.UserID = user.UserID

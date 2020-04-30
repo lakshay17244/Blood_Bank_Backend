@@ -1,7 +1,30 @@
-drop database connectgroup;
-create database ConnectGroup;
-use ConnectGroup;
+import mysql.connector
+from data import *
+from random import randint
 
+# mydb = mysql.connector.connect(
+# 	host="localhost",
+# 	user="root",
+# 	passwd="lakshay",
+# 	database="ConnectGroup"
+# )
+
+mydb = mysql.connector.connect(
+	host="us-cdbr-iron-east-01.cleardb.net",
+	user="b7a5b3c4153c9b",
+	passwd="47ca5c8e",
+	database="heroku_f4655c55cf4efcf"
+)
+
+mycursor=mydb.cursor()
+
+query = []
+
+query.append("drop database heroku_f4655c55cf4efcf")
+query.append("create database heroku_f4655c55cf4efcf")
+query.append("use heroku_f4655c55cf4efcf")
+
+query.append("""
 CREATE TABLE `User`
 ( 
  `UserID`  	int UNIQUE,
@@ -16,10 +39,10 @@ CREATE TABLE `User`
 PRIMARY KEY (`UserID`) ,
 CHECK (`Age`>=18 or `Type`='Patient') ,
 CHECK (`Type` IN ('Donor' , 'Patient','Admin'))
-);
+)""")
 
 
-CREATE TABLE `Blood_Bank`
+query.append("""CREATE TABLE `Blood_Bank`
 (
  `Name`          varchar(150) NOT NULL ,
  `Pincode` 		varchar(50) NOT NULL ,
@@ -31,10 +54,10 @@ CREATE TABLE `Blood_Bank`
 PRIMARY KEY (`BBID`) ,
 CHECK (`TotalCapacity` BETWEEN 1 and 10000),
 CHECK (`CapacityLeft` <= `TotalCapacity`)
-);
+)""")
 
 
-CREATE TABLE `Donation_Centers`
+query.append("""CREATE TABLE `Donation_Centers`
 (
  `Name`         varchar(150) NOT NULL ,
  `DCID`    		int UNIQUE,
@@ -45,10 +68,10 @@ CREATE TABLE `Donation_Centers`
 
 PRIMARY KEY (`DCID`) ,
 FOREIGN KEY (`BBID`) REFERENCES Blood_Bank(`BBID`)
-);
+)""")
 
 
-CREATE TABLE `Available_Donor`
+query.append("""CREATE TABLE `Available_Donor`
 ( 
  `UserID`  			int UNIQUE,
  `RegisteredOn`    	date NOT NULL ,
@@ -58,10 +81,10 @@ CREATE TABLE `Available_Donor`
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 CHECK (`BloodGroup` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+'))
-);
+)""")
 
 
-CREATE TABLE `Donated_Blood`
+query.append("""CREATE TABLE `Donated_Blood`
 (
  `UserID`  		int NOT NULL ,
  `DateRecieved` date NOT NULL ,
@@ -74,10 +97,10 @@ PRIMARY KEY (`UserID`, `DateRecieved`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 FOREIGN KEY (`DCID`) REFERENCES Donation_Centers(`DCID`) ,
 CHECK (`BloodGroup` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+'))
-);
+)""")
 
 
-CREATE TABLE `Appointment`
+query.append("""CREATE TABLE `Appointment`
 ( 
  `AID`  	int UNIQUE,
  `UserID`  		int NOT NULL ,
@@ -87,10 +110,10 @@ CREATE TABLE `Appointment`
 PRIMARY KEY (`AID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 FOREIGN KEY (`DCID`) REFERENCES Donation_Centers(`DCID`)
-);
+)""")
 
 
-CREATE TABLE `Hospital`
+query.append("""CREATE TABLE `Hospital`
 (
  `HID`              int UNIQUE,
  `Name`             varchar(150) NOT NULL ,
@@ -99,9 +122,9 @@ CREATE TABLE `Hospital`
  `AdmittedPatients` int NOT NULL ,
 
 PRIMARY KEY (`HID`)
-);
+)""")
 
-CREATE TABLE `EmergencyRequirements`
+query.append("""CREATE TABLE `EmergencyRequirements`
 (
  `EID`              int UNIQUE,
  `BloodNeeded`   varchar(3) ,
@@ -110,10 +133,10 @@ CREATE TABLE `EmergencyRequirements`
 FOREIGN KEY (`DoctorID`) REFERENCES User(`UserID`),
 CHECK (`BloodNeeded` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+')),
 PRIMARY KEY (`EID`)
-);
+)""")
 
 
-CREATE TABLE `Patients_List`
+query.append("""CREATE TABLE `Patients_List`
 (
  `PID` int NOT NULL,
  `UserID`  	int NOT NULL,
@@ -125,10 +148,10 @@ PRIMARY KEY (`PID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`),
 FOREIGN KEY (`HID`) REFERENCES Hospital(`HID`),
 CHECK (`BloodNeeded` IN ('A-', 'B-', 'AB-', 'O-', 'A+', 'B+', 'AB+', 'O+'))
-);
+)""")
 
 
-CREATE TABLE `Hospital_Employee`
+query.append("""CREATE TABLE `Hospital_Employee`
 (
  `UserID`  	int UNIQUE,
  `HID`    	int NOT NULL ,
@@ -136,10 +159,10 @@ CREATE TABLE `Hospital_Employee`
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 FOREIGN KEY (`HID`) REFERENCES Hospital(`HID`)
-);
+)""")
 
 
-CREATE TABLE `Blood_Bank_Employee`
+query.append("""CREATE TABLE `Blood_Bank_Employee`
 (
  `UserID`  	int UNIQUE,
  `BBID`    	int NOT NULL ,
@@ -147,10 +170,10 @@ CREATE TABLE `Blood_Bank_Employee`
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 FOREIGN KEY (`BBID`) REFERENCES Blood_Bank(`BBID`)
-);
+)""")
 
 
-CREATE TABLE `Donation_Centers_Employee`
+query.append("""CREATE TABLE `Donation_Centers_Employee`
 (
  `UserID`  	int UNIQUE,
  `DCID`    	int NOT NULL ,
@@ -158,10 +181,10 @@ CREATE TABLE `Donation_Centers_Employee`
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`) ,
 FOREIGN KEY (`DCID`) REFERENCES Donation_Centers(`DCID`)
-);
+)""")
 
 
-CREATE TABLE `Passwords`
+query.append("""CREATE TABLE `Passwords`
 (
  `UserID`  	int UNIQUE,
  `Password` varchar(45) NOT NULL ,
@@ -169,14 +192,19 @@ CREATE TABLE `Passwords`
 
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`)
-);
+)""")
 
 
-CREATE TABLE `Profile_Picture`
+query.append("""CREATE TABLE `Profile_Picture`
 (
  `UserID`  	int UNIQUE,
  `URL`    	varchar(200) NOT NULL ,
 
 PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`)
-);
+)""")
+
+
+for q in query:
+    mycursor.execute(q)
+mydb.commit()
