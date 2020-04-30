@@ -5,3 +5,4 @@ __pycache__
 .gitignore
 debug.log
 .env
+config.py

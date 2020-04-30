@@ -21,7 +21,7 @@ CORS(app)
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-# LOCAL SQL SERVER
+# =========================== LOCAL SQL SERVER ===========================
 # app.config['MYSQL_USER'] = 'root'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 # app.config['MYSQL_DB'] = 'ConnectGroup'
@@ -29,17 +29,17 @@ app.config["DEBUG"] = True
 # app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
-# REMOTE SQL SERVER
+# =========================== REMOTE SQL SERVER ===========================
 # app.config['MYSQL_USER'] = 'swMUYUcOTM'
 # app.config['MYSQL_HOST'] = 'remotemysql.com'
 # app.config['MYSQL_DB'] = 'swMUYUcOTM'
 # app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
 
+
+# =========================== HEROKU APP ===========================
 # For local heroku server dev
 # app.config.from_object('config')
 
-
-# HEROKU APP
 app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
 app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
 app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
