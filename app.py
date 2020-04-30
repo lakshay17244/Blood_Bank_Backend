@@ -25,11 +25,19 @@ app.config["DEBUG"] = True
 # app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
-app.config['MYSQL_USER'] = 'swMUYUcOTM'
-app.config['MYSQL_HOST'] = 'remotemysql.com'
-app.config['MYSQL_DB'] = 'swMUYUcOTM'
-app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
+# app.config['MYSQL_USER'] = 'swMUYUcOTM'
+# app.config['MYSQL_HOST'] = 'remotemysql.com'
+# app.config['MYSQL_DB'] = 'swMUYUcOTM'
+# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
 
+
+# HEROKU APP
+mydb = mysql.connector.connect(
+	host="***REMOVED***",
+	user="***REMOVED***",
+	passwd="***REMOVED***",
+	database="***REMOVED***"
+)
 
 mysql = MySQL(app)
 
