@@ -1,39 +1,49 @@
 import mysql.connector
 from data import *
 from random import randint
-
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config["DEBUG"] = True
+import config						#need to have secret keys in config.py
 
 # =========================== LOCAL SQL SERVER ===========================
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_HOST'] = '127.0.0.1'
-# app.config['MYSQL_DB'] = 'ConnectGroup'
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
+host="localhost"
+user="root"
+passwd="lakshay"
+# passwd="dbms_123"
+database="ConnectGroup"
 
 
 # =========================== REMOTE SQL SERVER ===========================
-# app.config['MYSQL_USER'] = 'swMUYUcOTM'
-# app.config['MYSQL_HOST'] = 'remotemysql.com'
-# app.config['MYSQL_DB'] = 'swMUYUcOTM'
-# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
+# host="remotemysql.com"
+# user="swMUYUcOTM"
+# passwd="LlyHn4U47w"
+# database="swMUYUcOTM
 
 
 # =========================== HEROKU APP ===========================
 # For local heroku server dev
-app.config.from_object('config')
+
+# host=config.MYSQL_HOST
+# user=config.MYSQL_USER
+# passwd=config.MYSQL_PASSWORD
+# database=config.MYSQL_DB
+
+
 
 # Initialise SQL Connection
-mysql = MySQL(app)
-mycursor=mysql.connection.cursor()
+mydb = mysql.connector.connect(
+	host=host,
+	user=user,
+	passwd=passwd,
+	database=database
+)
+mycursor=mydb.cursor()
+
 
 
 query = []
 
-query.append("drop database "+app.config['MYSQL_DB'])
-query.append("create database "+app.config['MYSQL_DB'])
-query.append("use "+app.config['MYSQL_DB'])
+query.append("drop database "+database)
+query.append("create database "+database)
+query.append("use "+database)
 
 query.append("""CREATE TABLE `User`
 ( 
