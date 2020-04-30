@@ -2,30 +2,40 @@ import mysql.connector
 from data import *
 from random import randint
 
-# mydb = mysql.connector.connect(
-# 	host="localhost",
-# 	user="root",
-# 	passwd="lakshay",
-# 	database="ConnectGroup"
-# )
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config["DEBUG"] = True
 
-mydb = mysql.connector.connect(
-	host="us-cdbr-iron-east-01.cleardb.net",
-	user="b7a5b3c4153c9b",
-	passwd="47ca5c8e",
-	database="heroku_f4655c55cf4efcf"
-)
+# =========================== LOCAL SQL SERVER ===========================
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_HOST'] = '127.0.0.1'
+# app.config['MYSQL_DB'] = 'ConnectGroup'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
-mycursor=mydb.cursor()
+
+# =========================== REMOTE SQL SERVER ===========================
+# app.config['MYSQL_USER'] = 'swMUYUcOTM'
+# app.config['MYSQL_HOST'] = 'remotemysql.com'
+# app.config['MYSQL_DB'] = 'swMUYUcOTM'
+# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
+
+
+# =========================== HEROKU APP ===========================
+# For local heroku server dev
+app.config.from_object('config')
+
+# Initialise SQL Connection
+mysql = MySQL(app)
+mycursor=mysql.connection.cursor()
+
 
 query = []
 
-query.append("drop database heroku_f4655c55cf4efcf")
-query.append("create database heroku_f4655c55cf4efcf")
-query.append("use heroku_f4655c55cf4efcf")
+query.append("drop database "+app.config['MYSQL_DB'])
+query.append("create database "+app.config['MYSQL_DB'])
+query.append("use "+app.config['MYSQL_DB'])
 
-query.append("""
-CREATE TABLE `User`
+query.append("""CREATE TABLE `User`
 ( 
  `UserID`  	int UNIQUE,
  `Type`     varchar(10) ,
