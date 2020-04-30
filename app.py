@@ -18,17 +18,17 @@ CORS(app)
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_HOST'] = '127.0.0.1'
-app.config['MYSQL_DB'] = 'ConnectGroup'
-app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_HOST'] = '127.0.0.1'
+# app.config['MYSQL_DB'] = 'ConnectGroup'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
 # app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
-# app.config['MYSQL_USER'] = 'swMUYUcOTM'
-# app.config['MYSQL_HOST'] = 'remotemysql.com'
-# app.config['MYSQL_DB'] = 'swMUYUcOTM'
-# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
+app.config['MYSQL_USER'] = 'swMUYUcOTM'
+app.config['MYSQL_HOST'] = 'remotemysql.com'
+app.config['MYSQL_DB'] = 'swMUYUcOTM'
+app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
 
 
 mysql = MySQL(app)
