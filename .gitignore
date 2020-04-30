@@ -4,3 +4,4 @@ __pycache__
 .vscode
 .gitignore
 debug.log
+.env
