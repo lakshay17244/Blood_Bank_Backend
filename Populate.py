@@ -1,7 +1,7 @@
 import mysql.connector
 from data import *
 from random import randint
-import config						#need to have secret keys in config.py
+# import config						#need to have secret keys in config.py
 
 # =========================== LOCAL SQL SERVER ===========================
 host="localhost"
