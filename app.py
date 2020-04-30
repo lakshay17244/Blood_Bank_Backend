@@ -4,6 +4,7 @@ from datetime import date
 from flask_cors import CORS
 import logging
 import sys
+import mysql.connector
 #=============================================================================================#
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ CORS(app)
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
+# LOCAL SQL SERVER
 # app.config['MYSQL_USER'] = 'root'
 # app.config['MYSQL_HOST'] = '127.0.0.1'
 # app.config['MYSQL_DB'] = 'ConnectGroup'
@@ -25,6 +27,7 @@ app.config["DEBUG"] = True
 # app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
+# REMOTE SQL SERVER
 # app.config['MYSQL_USER'] = 'swMUYUcOTM'
 # app.config['MYSQL_HOST'] = 'remotemysql.com'
 # app.config['MYSQL_DB'] = 'swMUYUcOTM'
@@ -32,12 +35,11 @@ app.config["DEBUG"] = True
 
 
 # HEROKU APP
-mydb = mysql.connector.connect(
-	host="***REMOVED***",
-	user="***REMOVED***",
-	passwd="***REMOVED***",
-	database="***REMOVED***"
-)
+app.config['MYSQL_USER'] = '***REMOVED***'
+app.config['MYSQL_HOST'] = "***REMOVED***"
+app.config['MYSQL_DB'] = '***REMOVED***'
+app.config['MYSQL_PASSWORD'] = '***REMOVED***'
+
 
 mysql = MySQL(app)
 
