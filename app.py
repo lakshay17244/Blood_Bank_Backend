@@ -1,14 +1,18 @@
 from flask import Flask,jsonify,request
 from flask_mysqldb import MySQL 
 from datetime import date
-from flask_cors import CORS, cross_origin
-
+from flask_cors import CORS
+import logging
 
 #=============================================================================================#
 
 app = Flask(__name__)
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+# Enable Logging for Heroku
+app.logger.addHandler(logging.StreamHandler(sys.stdout))
+app.logger.setLevel(logging.ERROR)
+
+# Enable CORS
+CORS(app)
 
 
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
@@ -59,7 +63,6 @@ def getTableDetails(table):
 
 # Working
 @app.route('/getWTDDonors/<BG>')
-@cross_origin()
 def getWTDDonors(BG):
 	cur = mysql.connection.cursor()
 	query = """select distinct user.Email from available_donor join user on available_donor.UserID = user.UserID
