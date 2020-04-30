@@ -6,6 +6,7 @@ import logging
 import sys
 import mysql.connector
 from os import environ
+
 #=============================================================================================#
 
 app = Flask(__name__)

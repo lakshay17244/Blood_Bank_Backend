@@ -3,35 +3,34 @@ from data import *
 from random import randint
 
 
-# LOCAL SQL SERVER
-mydb = mysql.connector.connect(
-	host="localhost",
-	user="root",
-	passwd="lakshay",
-	# passwd="dbms_123",
-	database="ConnectGroup"
-)
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
+app.config["DEBUG"] = True
+
+# =========================== LOCAL SQL SERVER ===========================
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_HOST'] = '127.0.0.1'
+# app.config['MYSQL_DB'] = 'ConnectGroup'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
-# REMOTE SQL SERVER
-# mydb = mysql.connector.connect(
-# 	host="remotemysql.com",
-# 	user="swMUYUcOTM",
-# 	passwd="LlyHn4U47w",
-# 	database="swMUYUcOTM"
-# )
-
-# HEROKU APP
-# mydb = mysql.connector.connect(
-# 	host="***REMOVED***",
-# 	user="***REMOVED***",
-# 	passwd="***REMOVED***",
-# 	database="***REMOVED***"
-# )
+# =========================== REMOTE SQL SERVER ===========================
+# app.config['MYSQL_USER'] = 'swMUYUcOTM'
+# app.config['MYSQL_HOST'] = 'remotemysql.com'
+# app.config['MYSQL_DB'] = 'swMUYUcOTM'
+# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
 
 
-mycursor=mydb.cursor()
-mycursor.execute("use ConnectGroup")
+# =========================== HEROKU APP ===========================
+# For local heroku server dev
+app.config.from_object('config')
+
+# Initialise SQL Connection
+mysql = MySQL(app)
+mycursor=mysql.connection.cursor()
+
+
+# Start Populating
 
 
 Pincodes = ["110010","110020","110030","110040","110050","110060","110070","110090","118900","100200"]
