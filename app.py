@@ -57,11 +57,12 @@ def getTableDetails(table):
 #=============================================================================================#
 
 # Working
-@app.route('/getWTDDonors')
-def getWTDDonors():
+@app.route('/getWTDDonors/<BG>')
+def getWTDDonors(BG):
 	cur = mysql.connection.cursor()
 	query = """select distinct user.Email from available_donor join user on available_donor.UserID = user.UserID
-				where available_donor.WillingToDonate=1"""
+				where available_donor.WillingToDonate=1
+				and available_donor.BloodGroup="%s"	"""%(BG)
 	# print_it(query)
 	results = ""
 	try: 
