@@ -413,10 +413,11 @@ def addPatient():
 		# BEGIN TRANSACTION
 		mycursor.execute("BEGIN")
 		
-		sqlFormula = "Select max(PID)+1 from patients_list"
+		sqlFormula = "Select max(PID)+1 as PID from patients_list"
 		mycursor.execute(sqlFormula)
-		PID = mycursor.fetchall()[0]['max(PID)+1']
-
+		PID = mycursor.fetchall()[0]['PID']
+		if PID is None:
+			PID=1
 		#Insert values in patients_list table
 		sqlFormula = "INSERT INTO patients_list values (%s,%s,%s,%s,%s)"
 		toPut = (PID,UserID,AdmissionDate,BloodGroup,HID)
@@ -1225,6 +1226,21 @@ def showProfile(userId):
 			cur.execute(subquery)
 			wtd = cur.fetchall()[0]
 			results.update(wtd)
+		if(results['Type']=='Admin'):
+			queries = []
+			queries.append("Create temporary table associatedOrganization(UserID int, hasBloodBank bool, hasDonationCenter bool, hasHospital bool)")
+			queries.append("insert into associatedOrganization select UserID,false,false,false from User where type='Admin'")
+			queries.append("update associatedOrganization set hasBloodBank=true where UserID in (select UserID from Blood_Bank_Employee)")
+			queries.append("update associatedOrganization set hasDonationCenter=true where UserID in (select UserID from Donation_Centers_Employee)")
+			queries.append("update associatedOrganization set hasHospital=true where UserID in (select UserID from Hospital_Employee)")
+			# queries.append("delete from associatedOrganization where hasBloodBank=0 and hasDonationCenter=0 and hasHospital=0")
+			queries.append("select * from associatedOrganization where UserID=%s"%(userId))
+			for query in queries:
+				cur.execute(query)
+			org = cur.fetchone()
+			results.update(org)
+			subquery="drop table associatedOrganization"
+			cur.execute(subquery)
 		print_it(type(results))
 		return jsonify(results)
 	except Exception as e:
@@ -1350,9 +1366,7 @@ def getAdminOrganization(userId):
 	try: 
 		for query in queries:
 			cur.execute(query)
-		cur.execute(query)
 		results = cur.fetchall()[0]
-		
 		subquery="drop table associatedOrganization"
 		cur.execute(subquery)
 		return jsonify(results)
