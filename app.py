@@ -23,10 +23,10 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
 # =========================== LOCAL SQL SERVER ===========================
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_HOST'] = '127.0.0.1'
-app.config['MYSQL_DB'] = 'ConnectGroup'
-app.config['MYSQL_PASSWORD'] = 'lakshay'
+# app.config['MYSQL_USER'] = 'root'
+# app.config['MYSQL_HOST'] = '127.0.0.1'
+# app.config['MYSQL_DB'] = 'ConnectGroup'
+# app.config['MYSQL_PASSWORD'] = 'lakshay'
 # app.config['MYSQL_PASSWORD'] = 'dbms_123'
 
 
@@ -40,11 +40,12 @@ app.config['MYSQL_PASSWORD'] = 'lakshay'
 # =========================== HEROKU APP ===========================
 # For local heroku server dev
 # app.config.from_object('config')
+# print(environ['ENV'])
 
-# app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
-# app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
-# app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
-# app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
+app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
+app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
+app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
+app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
 
 
 mysql = MySQL(app)
@@ -1391,6 +1392,6 @@ def print_it(s):
 #=============================================================================================#
 #Command to run the app
 if __name__ == "__main__":
-	app.run()
+	app.run(debug=true)
 
 #=============================================================================================#
