@@ -40,12 +40,12 @@ mycursor=mydb.cursor()
 
 # Start Populating
 
-
-Pincodes = ["110010","110020","110030","110040","110050","110060","110070","110090","118900","100200"]
+# Sukhdev Vihar, Okhla Phase 3, Okhla NSIC, Hauz Khas, Chirag Delhi, Safdurjang, VK
+Pincodes = ["110025","110020","110019","110016","110017","110029","110070"]
 TotalCapacity = [5000,10000]
 
 def getPincode():
-	return Pincodes[randint(0,9)]
+	return Pincodes[randint(0,len(Pincodes)-1)]
 
 
 ############ USER TABLE ############
