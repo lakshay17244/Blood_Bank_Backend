@@ -40,19 +40,22 @@ mycursor=mydb.cursor()
 
 # Start Populating
 
-# Sukhdev Vihar, Okhla Phase 3, Okhla NSIC, Hauz Khas, Chirag Delhi, Safdurjang, VK
+Address = ['Sukhdev Vihar', 'Okhla Phase 3', 'Okhla NSIC', 'Hauz Khas', 'Chirag Delhi', 'Safdurjang', 'Vasant Kunj']
 Pincodes = ["110025","110020","110019","110016","110017","110029","110070"]
 TotalCapacity = [5000,10000]
 
 def getPincode():
 	return Pincodes[randint(0,len(Pincodes)-1)]
 
+def getRandNumber():
+	return randint(0,len(Pincodes)-1)
 
 ############ USER TABLE ############
 sqlFormula = "INSERT INTO User VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
 i=1
 for user in Users:
-	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],user["Address"],getPincode(),user["Age"])
+	addressToss = getRandNumber()
+	toPut = (i,user["Type"],user["Username"],user["Phone"],user["Email"],Address[addressToss],Pincodes[addressToss],user["Age"])
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -61,9 +64,8 @@ for user in Users:
 sqlFormula = "INSERT INTO Hospital VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in Hospitals:
-	# print(h)
-	toPut = (i,h["Name"]+" Hospital",getPincode(),h["Address"],h["AdmittedPatients"])
-	# print(toPut)
+	addressToss = getRandNumber()
+	toPut = (i,h["Name"]+" Hospital",Address[addressToss],Pincodes[addressToss],h["AdmittedPatients"])
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
@@ -84,8 +86,9 @@ sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
 i=1
 for h in BloodBanks:
 	# print(h)
+	addressToss = getRandNumber()
 	TCap = TotalCapacity[randint(0,1)]
-	toPut = (h["Name"]+" Blood Bank",getPincode(),i,h["Address"],randint(0,TCap),TCap)
+	toPut = (h["Name"]+" Blood Bank",i,Address[addressToss],Pincodes[addressToss],TCap,TCap)
 	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
@@ -97,7 +100,8 @@ sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
 i=1
 for h in Donation_Centers:
 	# print(h)
-	toPut = (h["Name"]+" Donation Center",i,getPincode(),h["Address"],i)
+	addressToss = getRandNumber()
+	toPut = (h["Name"]+" Donation Center",i,Address[addressToss],Pincodes[addressToss],i)
 	# print(toPut)
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
