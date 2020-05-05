@@ -563,7 +563,7 @@ def updateBB():
 	Address = request.json['Address']
 	Pincode = request.json['Pincode']
 	TotalCapacity = request.json['TotalCapacity']
-
+	CapacityLeft = request.json['CapacityLeft']
 	response = ""
 	
 	try:
@@ -572,8 +572,8 @@ def updateBB():
 		mycursor.execute("BEGIN")
 		
 		#Update values in donation_centers table
-		sqlFormula = "UPDATE Blood_Bank SET Name=%s,Address=%s,Pincode=%s,TotalCapacity=%s WHERE BBID=%s"
-		toPut = (Name,Address,Pincode,TotalCapacity,BBID)
+		sqlFormula = "UPDATE Blood_Bank SET Name=%s,Address=%s,Pincode=%s,TotalCapacity=%s,CapacityLeft=%s WHERE BBID=%s"
+		toPut = (Name,Address,Pincode,TotalCapacity,CapacityLeft,BBID)
 		mycursor.execute(sqlFormula,toPut)
 
 		# If no exception, then COMMIT the transaction
@@ -844,25 +844,39 @@ def rmvEmp():
 
 	try: 
 		cur.execute(query)
-		results = cur.fetchall()
-		if(len(results)==0):
-			return jsonify({'Error': 'True','message':'No such user'})
+		user = cur.fetchone()
+		if(user is None):
+			return jsonify({'status':401,'Error': 'True','message':'''UserID Doesn't Exist'''})
+		elif(user['Type']=='Donor'):
+			return jsonify({'status':401,'Error': 'True','message':'User is not of type Admin!'})
 		else:
 			
 			if(place == 'hospital'):
 				hid = request.json['HID']
+				subquery= "SELECT * FROM Hospital_Employee where UserID=%s and HID=%s"%(userId,hid)
+				cur.execute(subquery)
+				if(cur.fetchone() is None):
+					return jsonify({'status':401,'Error': 'True','message':'User is not an existing admin of your hospital'})
 				sqlFormula = "DELETE FROM Hospital_Employee WHERE UserID=%s AND HID=%s"%(userId,hid)
 			
 			elif(place == 'blood_bank'):
 				bbid = request.json['BBID']
+				subquery= "SELECT * FROM Blood_Bank_Employee where UserID=%s and BBID=%s"%(userId,bbid)
+				cur.execute(subquery)
+				if(cur.fetchone() is None):
+					return jsonify({'status':401,'Error': 'True','message':'User is not an existing admin of your Blood Bank'})
 				sqlFormula = "DELETE FROM Blood_Bank_Employee WHERE UserID=%s AND BBID=%s"%(userId,bbid)
 			
 			elif(place == 'donation_centers'):
 				dcid = request.json['DCID']
+				subquery= "SELECT * FROM Donation_Centers_Employee where UserID=%s and DCID=%s"%(userId,dcid)
+				cur.execute(subquery)
+				if(cur.fetchone() is None):
+					return jsonify({'status':401,'Error': 'True','message':'User is not an existing admin of your Donation Center'})
 				sqlFormula = "DELETE FROM Donation_Centers_Employee WHERE UserID=%s AND DCID=%s"%(userId,dcid)
 			
 			else:
-				return  jsonify({'Error': 'True','message':'Not a valid place'})
+				return  jsonify({'status':401,'Error': 'True','message':'Error In Request Params - Place is not in {hospital,blood_bank,donation_centers}'})
 			
 			cur.execute(sqlFormula)
 			mysql.connection.commit()
@@ -885,9 +899,11 @@ def addEmp():
 
 	try: 
 		cur.execute(query)
-		results = cur.fetchall()
-		if(len(results)==0):
-			return jsonify({'Error': 'True','message':'No such user'})
+		user = cur.fetchone()
+		if(user is None):
+			return jsonify({'status':401,'Error': 'True','message':'''UserID Doesn't Exist'''})
+		elif(user['Type']=='Donor'):
+			return jsonify({'status':401,'Error': 'True','message':'User is not of type Admin!'})
 		else:
 			
 			if(place == 'hospital'):
@@ -911,7 +927,7 @@ def addEmp():
 			cur.execute(sqlFormula,toPut)
 			mysql.connection.commit()
 
-			response = {'status':200,'message':'Successfully Added Employee'}
+			response = {'status':200,'message':'Successfully Added Employee!'}
 			return jsonify(response)
 	
 	except Exception as e:
@@ -1066,7 +1082,7 @@ def addBloodBank():
 		print_it(id_)
 		
 		sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
-		toPut = (name,pincode,id_,address,capLeft,totalCap)
+		toPut = (name,id_,address,pincode,capLeft,totalCap)
 
 		mycursor.execute(sqlFormula,toPut)
 
@@ -1110,7 +1126,7 @@ def addDonCen():
 		print_it(id_)
 		
 		sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
-		toPut = (name,id_,pincode,address,bbid)
+		toPut = (name,id_,address,pincode,bbid)
 
 		mycursor.execute(sqlFormula,toPut)
 		mysql.connection.commit()
@@ -1153,8 +1169,7 @@ def addHospital():
 		print_it(id_)
 		
 		sqlFormula = "INSERT INTO Hospital VALUES(%s,%s,%s,%s,%s)"
-		toPut = (id_,name,pincode,address,admPatient)
-
+		toPut = (id_,name,address,pincode,admPatient)
 		mycursor.execute(sqlFormula,toPut)
 		mysql.connection.commit()
 
@@ -1192,17 +1207,23 @@ def donateBlood():
 		cur.execute(queryGetDCID)
 		DCID = cur.fetchall()[0]['DCID']
 		for user in userIdArray:
-			# Get Donor Blood Group
-			subquery = 'SELECT BloodGroup FROM Available_Donor where UserID=%s'%(user)
+			# Check if user is donor type
+			subquery = 'SELECT Type FROM user where UserID=%s'%(user)
 			cur.execute(subquery)
-			bloodGroup = cur.fetchall()[0]['BloodGroup']
-			# Add Donation Record
-			toPut = (user,dateRec,bloodGroup,1,DCID,0)
-			print(sqlFormula,toPut)
-			cur.execute(sqlFormula,toPut)
-			mysql.connection.commit()
-			i=i+1
-		response = {'status':200,'message':'Successfully Updated Donation Record'}
+			if(cur.fetchone()['Type']=="Donor"):
+				# Get Donor Blood Group
+				subquery = 'SELECT BloodGroup FROM Available_Donor where UserID=%s'%(user)
+				cur.execute(subquery)
+				bloodGroup = cur.fetchall()[0]['BloodGroup']
+				# Add Donation Record
+				toPut = (user,dateRec,bloodGroup,1,DCID,0)
+				print(sqlFormula,toPut)
+				cur.execute(sqlFormula,toPut)
+				mysql.connection.commit()
+				i=i+1
+				response = {'status':200,'message':'Successfully Updated Donation Record'}
+			else:
+				response = {'status':401,'message':'User is not of type Donor!'}
 		return jsonify(response)
 
 	except Exception as e:

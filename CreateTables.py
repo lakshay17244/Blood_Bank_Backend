@@ -65,9 +65,9 @@ CHECK (`Type` IN ('Donor' , 'Patient','Admin'))
 query.append("""CREATE TABLE `Blood_Bank`
 (
  `Name`          varchar(150) NOT NULL ,
- `Pincode` 		varchar(50) NOT NULL ,
  `BBID`          int UNIQUE ,
  `Address` 		varchar(60) NOT NULL ,
+ `Pincode` 		varchar(50) NOT NULL ,
  `CapacityLeft`  int NOT NULL ,
  `TotalCapacity` int ,
 
@@ -81,8 +81,8 @@ query.append("""CREATE TABLE `Donation_Centers`
 (
  `Name`         varchar(150) NOT NULL ,
  `DCID`    		int UNIQUE,
- `Pincode` 		varchar(50) NOT NULL ,
  `Address` 		varchar(60) NOT NULL ,
+ `Pincode` 		varchar(50) NOT NULL ,
  `BBID`  		int NOT NULL ,
 
 
@@ -137,8 +137,8 @@ query.append("""CREATE TABLE `Hospital`
 (
  `HID`              int UNIQUE,
  `Name`             varchar(150) NOT NULL ,
- `Pincode`          varchar(15) NOT NULL ,
  `Address`          varchar(60) NOT NULL ,
+ `Pincode`          varchar(15) NOT NULL ,
  `AdmittedPatients` int NOT NULL ,
 
 PRIMARY KEY (`HID`)
@@ -224,6 +224,32 @@ PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`)
 )""")
 
+query.append("""CREATE TRIGGER insertTriggerBloodBankCapacity
+AFTER INSERT
+ON donated_blood
+FOR EACH ROW
+UPDATE
+blood_bank,
+	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
+	where donated_blood.available=1
+	group by BBID) 
+as toUpdate
+set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
+where blood_bank.BBID=toUpdate.BBID""")
+
+
+query.append("""CREATE TRIGGER updateTriggerBloodBankCapacity
+AFTER UPDATE
+ON donated_blood
+FOR EACH ROW
+UPDATE
+blood_bank,
+	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
+	where donated_blood.available=1
+	group by BBID) 
+as toUpdate
+set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
+where blood_bank.BBID=toUpdate.BBID""")
 
 for q in query:
     mycursor.execute(q)
