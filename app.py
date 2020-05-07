@@ -6,6 +6,10 @@ import logging
 import sys
 import mysql.connector
 from os import environ
+from flask_jwt_extended import (
+    JWTManager, jwt_required, create_access_token,jwt_optional,
+    get_jwt_identity
+)
 
 #=============================================================================================#
 
@@ -17,8 +21,6 @@ app.logger.setLevel(logging.ERROR)
 
 # Enable CORS
 CORS(app)
-
-
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 app.config["DEBUG"] = True
 
@@ -38,16 +40,21 @@ app.config["DEBUG"] = True
 
 
 # =========================== HEROKU APP ===========================
-# For local heroku server dev
-# app.config.from_object('config')
-# print(environ['ENV'])
+# For LOCAL heroku server dev
+app.config.from_object('config')
 
+# PRODUCTION
 app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
 app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
 app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
 app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
+app.config['JWT_SECRET_KEY'] = environ.get('JWT_SECRET_KEY')
 
 
+# =========================== JWT ===========================
+jwt = JWTManager(app)
+
+# Connect DB
 mysql = MySQL(app)
 
 
@@ -1229,22 +1236,22 @@ def donateBlood():
 	except Exception as e:
 		return jsonify({'status':401,'Error': 'True','message': str(e)})
 
-
-# Working
-@app.route('/showprofile/<userId>')
-def showProfile(userId):
+@app.route('/showprofile')
+@jwt_required
+def showProfile():
+	UserID = get_jwt_identity()
 	cur = mysql.connection.cursor()
-	query = " SELECT * FROM User where UserID=%s"%(userId)
+	query = " SELECT * FROM User where UserID=%s"%(UserID)
 
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Type']=='Donor'):
-			subquery = 'SELECT BloodGroup FROM Available_Donor where UserID=%s'%(userId)
+			subquery = 'SELECT BloodGroup FROM Available_Donor where UserID=%s'%(UserID)
 			cur.execute(subquery)
 			bloodGroup = cur.fetchall()[0]
 			results.update(bloodGroup)
-			subquery = 'SELECT WillingToDonate FROM Available_Donor where UserID=%s'%(userId)
+			subquery = 'SELECT WillingToDonate FROM Available_Donor where UserID=%s'%(UserID)
 			cur.execute(subquery)
 			wtd = cur.fetchall()[0]
 			results.update(wtd)
@@ -1256,7 +1263,7 @@ def showProfile(userId):
 			queries.append("update associatedOrganization set hasDonationCenter=true where UserID in (select UserID from Donation_Centers_Employee)")
 			queries.append("update associatedOrganization set hasHospital=true where UserID in (select UserID from Hospital_Employee)")
 			# queries.append("delete from associatedOrganization where hasBloodBank=0 and hasDonationCenter=0 and hasHospital=0")
-			queries.append("select * from associatedOrganization where UserID=%s"%(userId))
+			queries.append("select * from associatedOrganization where UserID=%s"%(UserID))
 			for query in queries:
 				cur.execute(query)
 			org = cur.fetchone()
@@ -1271,22 +1278,25 @@ def showProfile(userId):
 
 # Working
 @app.route('/login', methods=['POST'])
-def loginFunction():
-	# dcid/hid/bbid FETCH
-	userId = request.json["UserID"]
+@jwt_optional
+def login():
+	UserID = get_jwt_identity()
+	if(UserID):
+		access_token = create_access_token(identity=UserID)
+		return jsonify({'message':'Logged in successfully','access_token':access_token}),200
+	UserID = request.json["UserID"]
 	cur = mysql.connection.cursor()
-	query = " SELECT * FROM Passwords where UserID=%d"%(userId)
+	query = " SELECT * FROM Passwords where UserID=%d"%(UserID)
 	try: 
 		cur.execute(query)
 		results = cur.fetchall()[0]
 		if(results['Password']==request.json["Password"]):
-			response = {'status':200,'message':'Logged in successfully'}
+			access_token = create_access_token(identity=UserID)
+			return jsonify({'message':'Logged in successfully','access_token':access_token}),200
 		else:
-			response = {'status':401,'message':'Wrong Password'}
-		
-		return jsonify(response)
+			return jsonify({'message':'Wrong Password'}), 401
 	except Exception as e:
-		return jsonify({'Error': 'True','message': str(e)})
+		return jsonify({'Error': 'True','message': str(e)}), 400
 
 
 
