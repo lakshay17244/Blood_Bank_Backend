@@ -1,3 +1,4 @@
+#  ========================================== IMPORTS ==========================================
 from flask import Flask,jsonify,request
 from flask_mysqldb import MySQL 
 from datetime import date
@@ -11,79 +12,95 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 
-#=============================================================================================#
 
+
+# ========================================== CONFIG SETTINGS ==========================================
+#  INITIALISE FLASK APP
 app = Flask(__name__)
 
-# Enable Logging for Heroku
-app.logger.addHandler(logging.StreamHandler(sys.stdout))
-app.logger.setLevel(logging.ERROR)
+# ----> MySQL Server to use <----
+# sqlServer = "remote"
+# sqlServer = "local"
+sqlServer = "heroku"
+
+# Mode: development OR production
+processEnv = app.config['ENV']
+
 
 # Enable CORS
 CORS(app)
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config["DEBUG"] = True
-
-# =========================== LOCAL SQL SERVER ===========================
-# app.config['MYSQL_USER'] = 'root'
-# app.config['MYSQL_HOST'] = '127.0.0.1'
-# app.config['MYSQL_DB'] = 'ConnectGroup'
-# app.config['MYSQL_PASSWORD'] = 'lakshay'
-# app.config['MYSQL_PASSWORD'] = 'dbms_123'
-
-
-# =========================== REMOTE SQL SERVER ===========================
-# app.config['MYSQL_USER'] = 'swMUYUcOTM'
-# app.config['MYSQL_HOST'] = 'remotemysql.com'
-# app.config['MYSQL_DB'] = 'swMUYUcOTM'
-# app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
-
-
-# =========================== HEROKU APP ===========================
-# For LOCAL heroku server dev
-# app.config.from_object('config')
 
 # PRODUCTION
-app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
-app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
-app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
-app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
-app.config['JWT_SECRET_KEY'] = environ.get('JWT_SECRET_KEY')
+if(processEnv == "production"):
+	# USE HEROKU
+	app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
+	app.config['MYSQL_HOST'] = environ.get('MYSQL_HOST')
+	app.config['MYSQL_DB'] = environ.get('MYSQL_DB')
+	app.config['MYSQL_PASSWORD'] = environ.get('MYSQL_PASSWORD')
+	app.config['JWT_SECRET_KEY'] = environ.get('JWT_SECRET_KEY')
+
+# DEVELOPMENT
+else:
+	
+	# =========================== LOCAL SQL SERVER ===========================
+	if(sqlServer == "local"):
+		app.config['MYSQL_USER'] = 'root'
+		app.config['MYSQL_HOST'] = '127.0.0.1'
+		app.config['MYSQL_DB'] = 'ConnectGroup'
+		app.config['MYSQL_PASSWORD'] = 'lakshay'
+		# app.config['MYSQL_PASSWORD'] = 'dbms_123'
+
+	# =========================== REMOTE SQL SERVER ===========================
+	elif (sqlServer=="remote"):	
+		app.config['MYSQL_USER'] = 'swMUYUcOTM'
+		app.config['MYSQL_HOST'] = 'remotemysql.com'
+		app.config['MYSQL_DB'] = 'swMUYUcOTM'
+		app.config['MYSQL_PASSWORD'] = 'LlyHn4U47w'
+
+	# =========================== HEROKU SQL SERVER ===========================
+	else:
+		app.config.from_object('config')
+		# Enable Logging for Heroku
+		app.logger.addHandler(logging.StreamHandler(sys.stdout))
+		app.logger.setLevel(logging.ERROR)
 
 
-# =========================== JWT ===========================
+# ========================================== JWT ==========================================
 jwt = JWTManager(app)
 
-# Connect DB
+
+# ========================================== UTILITIES ==========================================
+
+# --> Helper function to print in DEBUG mode
+def print_it(s):
+	if(app.config["DEBUG"]):
+		print(s)
+# --> Connect DB
 mysql = MySQL(app)
 
-
-#=============================================================================================#
-
+# ========================================== API's ==========================================
 
 @app.route('/')
 def home():
 	return "<h1>This is the backend for our DBMS Project - Blood Bank Management System</h1>"
 
 
-@app.route('/table/<table>')
-def getTableDetails(table):
-	#To see updated tables, just for development purpose
-	cur = mysql.connection.cursor()
-	print_it(table)
-	query = " SELECT * from "+ table
-	# print_it(query)
-	results = ""
-	try: 
-		cur.execute(query)
-		results = cur.fetchall()
-	except Exception as E:
-		results = {'Error': str(E)}
+# @app.route('/table/<table>')
+# def getTableDetails(table):
+# 	#To see updated tables, just for development purpose
+# 	cur = mysql.connection.cursor()
+# 	print_it(table)
+# 	query = " SELECT * from "+ table
+# 	# print_it(query)
+# 	results = ""
+# 	try: 
+# 		cur.execute(query)
+# 		results = cur.fetchall()
+# 	except Exception as E:
+# 		results = {'Error': str(E)}
 
-	return jsonify(results)
-
-
-#=============================================================================================#
+# 	return jsonify(results)
 
 # Working
 @app.route('/getWTDDonors/<BG>')
@@ -210,10 +227,8 @@ def removeemergencyrequirement():
 					DoctorID in (Select UserID from hospital_employee where HID = (Select HID from hospital_employee where UserID=%s))
 					and
 					EID=%s"""%(UserID,EID)
-		print(subquery)
 		mycursor.execute(subquery)
 		subresult = mycursor.fetchall()
-		print(subresult)
 		if(len(subresult) > 0):
 			sqlFormula = "DELETE from emergencyrequirements where EID=%s"%(EID)
 			mycursor.execute(sqlFormula)
@@ -1224,7 +1239,6 @@ def donateBlood():
 				bloodGroup = cur.fetchall()[0]['BloodGroup']
 				# Add Donation Record
 				toPut = (user,dateRec,bloodGroup,1,DCID,0)
-				print(sqlFormula,toPut)
 				cur.execute(sqlFormula,toPut)
 				mysql.connection.commit()
 				i=i+1
@@ -1407,22 +1421,15 @@ def getAdminOrganization(userId):
 
 
 #=============================================================================================#
-
 # Helper function to calculate age from DOB 
 def calculateAge(birthDate): 
 	today = date.today() 
 	age = today.year - birthDate.year - ((today.month, today.day) < (birthDate.month, birthDate.day)) 
 	return age
 
-
-#Helper function to print in DEBUG mode
-def print_it(s):
-	if(app.config["DEBUG"]):
-		print(s)
-
 #=============================================================================================#
 #Command to run the app
 if __name__ == "__main__":
-	app.run(debug=true)
+	app.run()
 
 #=============================================================================================#
