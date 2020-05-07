@@ -1,14 +1,14 @@
 import mysql.connector
 from data import *
 from random import randint
-# import config						#need to have secret keys in config.py
+import config						#need to have secret keys in config.py
 
 # =========================== LOCAL SQL SERVER ===========================
-host="localhost"
-user="root"
-passwd="lakshay"
-# passwd="dbms_123"
-database="ConnectGroup"
+# host="localhost"
+# user="root"
+# passwd="lakshay"
+# # passwd="dbms_123"
+# database="ConnectGroup"
 
 
 # =========================== REMOTE SQL SERVER ===========================
@@ -21,10 +21,10 @@ database="ConnectGroup"
 # =========================== HEROKU APP ===========================
 # For local heroku server dev
 
-# host=config.MYSQL_HOST
-# user=config.MYSQL_USER
-# passwd=config.MYSQL_PASSWORD
-# database=config.MYSQL_DB
+host=config.MYSQL_HOST
+user=config.MYSQL_USER
+passwd=config.MYSQL_PASSWORD
+database=config.MYSQL_DB
 
 
 
@@ -50,6 +50,7 @@ def getPincode():
 def getRandNumber():
 	return randint(0,len(Pincodes)-1)
 
+print("Populating USER TABLE")
 ############ USER TABLE ############
 sqlFormula = "INSERT INTO User VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
 i=1
@@ -60,6 +61,7 @@ for user in Users:
 	i=i+1
 	mydb.commit()
 
+print("Populating HOSPITAL TABLE")
 ############ HOSPITAL TABLE ############
 sqlFormula = "INSERT INTO Hospital VALUES(%s,%s,%s,%s,%s)"
 i=1
@@ -70,6 +72,7 @@ for h in Hospitals:
 	i=i+1
 	mydb.commit()
 
+print("Populating Passwords TABLE")
 ############ PASSWORDS TABLE ############
 sqlFormula = "INSERT INTO Passwords VALUES(%s,%s,%s)"
 i=1
@@ -81,6 +84,7 @@ for passwd in Passwords:
 	i=i+1
 	mydb.commit()
 
+print("Populating Blood_Bank TABLE")
 ############ BLOOD BANK TABLE ############
 sqlFormula = "INSERT INTO Blood_Bank VALUES(%s,%s,%s,%s,%s,%s)"
 i=1
@@ -94,6 +98,7 @@ for h in BloodBanks:
 	i=i+1
 	mydb.commit()
 
+print("Populating Donation_Centers TABLE")
 ############ DONATION_CENTER TABLE ############
 sqlFormula = "INSERT INTO Donation_Centers VALUES(%s,%s,%s,%s,%s)"
 
@@ -107,6 +112,7 @@ for h in Donation_Centers:
 	i=i+1
 	mydb.commit()
 
+print("Populating Donated Blood TABLE")
 ############ Donated Blood TABLE ############
 sqlFormula = "INSERT INTO Donated_Blood VALUES(%s,%s,%s,%s,%s,%s)"
 for i in range(30,60):
@@ -117,17 +123,19 @@ for i in range(30,60):
 	i=i+1
 	mydb.commit()
 
+print("Populating Available_Donor TABLE")
 ########### Available Donors TABLE ############
 sqlFormula = "INSERT INTO Available_Donor VALUES(%s,%s,%s,%s)"
 i=1
 for h in Available_Donors:
 	# print(h)
 	toPut = (i,h["RegisteredOn"],h["BloodGroup"],h["WillingToDonate"])
-	# print(toPut)
+	# print(toPut)	
 	mycursor.execute(sqlFormula,toPut)
 	i=i+1
 	mydb.commit()
 
+print("Populating Patients_List TABLE")
 ########### Patients List TABLE ############
 sqlFormula = "INSERT INTO Patients_List VALUES(%s,%s,%s,%s,%s)"
 i=1
@@ -139,6 +147,7 @@ for h in Patients_List:
 	mycursor.execute(sqlFormula,toPut)
 	mydb.commit()
 
+print("Populating ProfilePictures TABLE")
 ############ Profile Pictures TABLE ############
 sqlFormula = "INSERT INTO Profile_Picture VALUES(%s,%s)"
 i=1
@@ -150,7 +159,7 @@ for h in ProfilePictures:
 	i=i+1
 	mydb.commit()
 
-
+print("Populating Appointment TABLE")
 ############ Appointment TABLE ############
 sqlFormula = "INSERT INTO Appointment VALUES(%s,%s,%s,%s)"
 for i in range(1,6):
@@ -158,9 +167,8 @@ for i in range(1,6):
 	mycursor.execute(sqlFormula,toPut)
 	mydb.commit()
 
-
+print("Populating Hospital_Employee TABLE")
 ############ Hospital_Employee TABLE ############
-
 sqlFormula = "INSERT INTO Hospital_Employee VALUES(%s,%s)"
 for i in range(1,100):
 	h=Users[i]
@@ -194,11 +202,31 @@ sqlFormula = """Delete FROM Donation_Centers_Employee where UserID in (Select Us
 mycursor.execute(sqlFormula)
 mydb.commit()
 
-
+# 
+sqlFormula = """Delete from available_donor where available_donor.UserID in (select UserID from user where Type="Admin")"""
+mycursor.execute(sqlFormula)
+mydb.commit()
 
 # ------------------------------------- Indexes ------------------------------------- #
+# UserID Indexes
+sqlFormula = "CREATE INDEX idx_user_UserID ON User (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_appointment_UserID ON appointment (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_available_donor_UserID ON available_donor (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_blood_bank_employee_UserID ON blood_bank_employee (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_donated_blood_UserID ON donated_blood (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_donation_centers_employee_UserID ON donation_centers_employee (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_hospital_employee_UserID ON hospital_employee (UserID)"
+mycursor.execute(sqlFormula)
+sqlFormula = "CREATE INDEX idx_passwords_UserID ON passwords (UserID)"
+mycursor.execute(sqlFormula)
 
-# Pincode
+# Pincode Indexes
 sqlFormula = "CREATE INDEX idx_user_Pincode ON User (Pincode)"
 mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_donation_centers_Pincode ON Donation_Centers (Pincode)"
@@ -209,7 +237,7 @@ sqlFormula = "CREATE INDEX idx_blood_bank_Pincode ON Blood_Bank (Pincode)"
 mycursor.execute(sqlFormula)
 mydb.commit()
 
-# Blood Group
+# Blood Group Indexes
 sqlFormula = "CREATE INDEX idx_donated_blood_BG ON Donated_Blood (BloodGroup)"
 mycursor.execute(sqlFormula)
 sqlFormula = "CREATE INDEX idx_available_donor_BG ON Available_Donor (BloodGroup)"

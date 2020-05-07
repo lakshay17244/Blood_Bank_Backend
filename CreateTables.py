@@ -1,14 +1,14 @@
 import mysql.connector
 from data import *
 from random import randint
-#import config						#need to have secret keys in config.py
+import config						#For local heroku server dev / need to have secret keys in config.py
 
 # =========================== LOCAL SQL SERVER ===========================
-host="localhost"
-user="root"
-passwd="lakshay"
-# passwd="dbms_123"
-database="ConnectGroup"
+# host="localhost"
+# user="root"
+# passwd="lakshay"
+# # passwd="dbms_123"
+# database="ConnectGroup"
 
 
 # =========================== REMOTE SQL SERVER ===========================
@@ -21,12 +21,10 @@ database="ConnectGroup"
 # =========================== HEROKU APP ===========================
 # For local heroku server dev
 
-# host=config.MYSQL_HOST
-# user=config.MYSQL_USER
-# passwd=config.MYSQL_PASSWORD
-# database=config.MYSQL_DB
-
-
+host=config.MYSQL_HOST
+user=config.MYSQL_USER
+passwd=config.MYSQL_PASSWORD
+database=config.MYSQL_DB
 
 # Initialise SQL Connection
 mydb = mysql.connector.connect(
@@ -36,7 +34,6 @@ mydb = mysql.connector.connect(
 	database=database
 )
 mycursor=mydb.cursor()
-
 
 
 query = []
@@ -224,33 +221,34 @@ PRIMARY KEY (`UserID`) ,
 FOREIGN KEY (`UserID`) REFERENCES User(`UserID`)
 )""")
 
-query.append("""CREATE TRIGGER insertTriggerBloodBankCapacity
-AFTER INSERT
-ON donated_blood
-FOR EACH ROW
-UPDATE
-blood_bank,
-	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
-	where donated_blood.available=1
-	group by BBID) 
-as toUpdate
-set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
-where blood_bank.BBID=toUpdate.BBID""")
+# query.append("""CREATE TRIGGER insertTriggerBloodBankCapacity
+# AFTER INSERT
+# ON donated_blood
+# FOR EACH ROW
+# UPDATE
+# blood_bank,
+# 	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
+# 	where donated_blood.available=1
+# 	group by BBID) 
+# as toUpdate
+# set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
+# where blood_bank.BBID=toUpdate.BBID""")
 
 
-query.append("""CREATE TRIGGER updateTriggerBloodBankCapacity
-AFTER UPDATE
-ON donated_blood
-FOR EACH ROW
-UPDATE
-blood_bank,
-	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
-	where donated_blood.available=1
-	group by BBID) 
-as toUpdate
-set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
-where blood_bank.BBID=toUpdate.BBID""")
+# query.append("""CREATE TRIGGER updateTriggerBloodBankCapacity
+# AFTER UPDATE
+# ON donated_blood
+# FOR EACH ROW
+# UPDATE
+# blood_bank,
+# 	(SELECT count(*) as CapacityFilled, donation_centers.BBID as BBID FROM donated_blood join donation_centers on donated_blood.DCID=donation_centers.DCID
+# 	where donated_blood.available=1
+# 	group by BBID) 
+# as toUpdate
+# set blood_bank.CapacityLeft = blood_bank.TotalCapacity-toUpdate.CapacityFilled
+# where blood_bank.BBID=toUpdate.BBID""")
 
 for q in query:
-    mycursor.execute(q)
+	print(q)
+	mycursor.execute(q)
 mydb.commit()
