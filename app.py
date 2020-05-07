@@ -41,7 +41,7 @@ app.config["DEBUG"] = True
 
 # =========================== HEROKU APP ===========================
 # For LOCAL heroku server dev
-app.config.from_object('config')
+# app.config.from_object('config')
 
 # PRODUCTION
 app.config['MYSQL_USER'] = environ.get('MYSQL_USER')
